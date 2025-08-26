@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/r-huijts-portkey-admin-mcp-server-badge.png)](https://mseep.ai/app/r-huijts-portkey-admin-mcp-server)
+
 # Portkey MCP Server
 [![smithery badge](https://smithery.ai/badge/@r-huijts/portkey-admin-mcp-server)](https://smithery.ai/server/@r-huijts/portkey-admin-mcp-server)
 
