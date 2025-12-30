@@ -914,9 +914,9 @@ server.tool(
             action: result.action,
             dry_run: result.dry_run,
             message: result.message,
-            prompt_id: result.prompt_id || undefined,
-            slug: result.slug || undefined,
-            version_id: result.version_id || undefined
+            prompt_id: result.prompt_id ?? undefined,
+            slug: result.slug ?? undefined,
+            version_id: result.version_id ?? undefined
           }, null, 2)
         }]
       };

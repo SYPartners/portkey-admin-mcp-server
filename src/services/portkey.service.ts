@@ -337,6 +337,7 @@ interface PromptTemplateMetadata {
 interface CreatePromptRequest {
   name: string;
   collection_id: string;
+  /** Portkey API field name - contains message array, not a string */
   string: PromptMessage[];
   parameters: PromptParameter[];
   virtual_key: string;
@@ -388,6 +389,7 @@ interface PromptVersion {
   id: string;
   version_number: number;
   version_description?: string;
+  /** Portkey API field name - contains message array, not a string */
   string: PromptMessage[];
   parameters: PromptParameter[];
   model?: string;
@@ -416,6 +418,7 @@ interface GetPromptResponse {
 interface UpdatePromptRequest {
   name?: string;
   collection_id?: string;
+  /** Portkey API field name - contains message array, not a string */
   string?: PromptMessage[];
   parameters?: PromptParameter[];
   model?: string;
@@ -511,6 +514,7 @@ interface MigratePromptRequest {
   app: string;
   env: string;
   collection_id: string;
+  /** Portkey API field name - contains message array, not a string */
   string: PromptMessage[];
   parameters: PromptParameter[];
   virtual_key: string;
@@ -1067,10 +1071,10 @@ export class PortkeyService {
           'Accept': 'application/json'
         },
         body: JSON.stringify({
-          ...data.hyperparameters,
           variables: data.variables,
           metadata: data.metadata,
-          stream: false // Force non-streaming for MCP tool response
+          stream: false, // Force non-streaming for MCP tool response
+          ...data.hyperparameters
         })
       });
 
