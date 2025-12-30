@@ -101,7 +101,7 @@ This MCP server provides comprehensive access to Portkey's platform through the 
 - **Virtual Key Details**: Monitor key status, usage limits, and rate limits
 - **API Integration**: Track API endpoints and their configurations
 
-### Prompt Admin (New!)
+### Prompt Admin
 - **Collection Management**: Organize prompts by app using collections
 - **Prompt CRUD**: Create, list, get, and update prompt templates
 - **Version Control**: Automatic versioning on prompt updates
@@ -110,6 +110,14 @@ This MCP server provides comprehensive access to Portkey's platform through the 
 - **Migration Helper**: Create-or-update prompts with app/env support
 - **Environment Promotion**: Promote prompts from staging to production
 - **Billing Validation**: Enforce required metadata for cost attribution
+
+### Core Admin (New!)
+- **Config Management**: Full CRUD operations for gateway configurations with versioning
+- **API Key Management**: Create, list, update, and delete API keys with scopes, rate limits, and usage limits
+- **Virtual Key Management**: Manage provider virtual keys with rate limiting and budget controls
+- **Workspace Management**: Create, update, and delete workspaces with default settings
+- **Workspace Members**: Add, list, update roles, and remove workspace members
+- **User Management**: Get, update, and delete user accounts
 
 ## Prompt Admin Tools
 
@@ -191,6 +199,84 @@ When running prompt completions, the following metadata is required for cost att
 - client_id: 'acme-corp'
 - app: 'hourlink'
 - env: 'prod'"
+```
+
+## Core Admin Tools
+
+This server includes 24 tools for comprehensive Portkey resource management.
+
+### Config Management
+
+| Tool | Description |
+|------|-------------|
+| `create_config` | Create a new gateway configuration with routing, caching, and retry settings |
+| `update_config` | Update an existing configuration |
+| `delete_config` | Delete a configuration by ID |
+| `list_config_versions` | List all versions of a configuration |
+
+### API Key Management
+
+| Tool | Description |
+|------|-------------|
+| `create_api_key` | Create a new API key with optional scopes, rate limits, and usage limits |
+| `list_api_keys` | List all API keys with pagination support |
+| `get_api_key` | Get API key details by ID |
+| `update_api_key` | Update API key name, scopes, rate limits, or usage limits |
+| `delete_api_key` | Delete an API key by ID |
+
+### Virtual Key Management
+
+| Tool | Description |
+|------|-------------|
+| `create_virtual_key` | Create a new virtual key for a provider with rate/budget limits |
+| `get_virtual_key` | Get virtual key details by ID |
+| `update_virtual_key` | Update virtual key settings |
+| `delete_virtual_key` | Delete a virtual key by ID |
+
+### Workspace Management
+
+| Tool | Description |
+|------|-------------|
+| `create_workspace` | Create a new workspace with optional defaults |
+| `update_workspace` | Update workspace name, description, or defaults |
+| `delete_workspace` | Delete a workspace by ID |
+
+### Workspace Members
+
+| Tool | Description |
+|------|-------------|
+| `add_workspace_member` | Add a user to a workspace with a specific role |
+| `list_workspace_members` | List all members of a workspace with pagination |
+| `get_workspace_member` | Get workspace member details by user ID |
+| `update_workspace_member` | Update a member's role in a workspace |
+| `remove_workspace_member` | Remove a user from a workspace |
+
+### User Management
+
+| Tool | Description |
+|------|-------------|
+| `get_user` | Get user details by ID |
+| `update_user` | Update user first name, last name, or role |
+| `delete_user` | Delete a user from the organization |
+
+### Example Usage
+
+**Create an API key with rate limits:**
+```bash
+# Using Claude Code MCP
+"Create an API key called 'production-key' with rate limit of 100 requests per minute"
+```
+
+**Add a workspace member:**
+```bash
+# Using Claude Code MCP
+"Add user user_123 as an admin to workspace ws_456"
+```
+
+**Create a virtual key:**
+```bash
+# Using Claude Code MCP
+"Create a virtual key for OpenAI with a monthly budget of $500"
 ```
 
 ## License
