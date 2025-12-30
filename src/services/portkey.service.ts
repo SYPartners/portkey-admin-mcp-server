@@ -257,6 +257,305 @@ interface GetConfigResponse {
   };
 }
 
+// ============================================
+// Collection Interfaces (App Grouping)
+// ============================================
+
+interface Collection {
+  id: string;
+  name: string;
+  slug: string;
+  workspace_id: string;
+  created_at: string;
+  last_updated_at: string;
+  object: 'collection';
+}
+
+interface ListCollectionsParams {
+  workspace_id?: string;
+  current_page?: number;
+  page_size?: number;
+  search?: string;
+}
+
+interface ListCollectionsResponse {
+  data: Collection[];
+  total: number;
+  object: 'list';
+}
+
+interface CreateCollectionRequest {
+  name: string;
+  workspace_id?: string;
+}
+
+interface CreateCollectionResponse {
+  id: string;
+  slug: string;
+  object: 'collection';
+}
+
+// ============================================
+// Prompt Admin API Interfaces
+// ============================================
+
+interface PromptMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
+interface PromptParameter {
+  name: string;
+  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
+  default?: string | number | boolean | unknown[] | Record<string, unknown>;
+  required?: boolean;
+  description?: string;
+}
+
+interface PromptFunctionDefinition {
+  name: string;
+  description?: string;
+  parameters?: Record<string, unknown>;
+}
+
+interface PromptToolDefinition {
+  type: 'function';
+  function: PromptFunctionDefinition;
+}
+
+type ToolChoice = 'auto' | 'none' | { type: 'function'; function: { name: string } };
+
+interface PromptTemplateMetadata {
+  app?: string;
+  env?: string;
+  source_file?: string;
+  migrated_at?: string;
+  [key: string]: unknown;
+}
+
+// Create Prompt
+interface CreatePromptRequest {
+  name: string;
+  collection_id: string;
+  string: PromptMessage[];
+  parameters: PromptParameter[];
+  virtual_key: string;
+  functions?: PromptFunctionDefinition[];
+  tools?: PromptToolDefinition[];
+  tool_choice?: ToolChoice;
+  model?: string;
+  version_description?: string;
+  template_metadata?: PromptTemplateMetadata;
+}
+
+interface CreatePromptResponse {
+  id: string;
+  slug: string;
+  version_id: string;
+  object: 'prompt';
+}
+
+// List Prompts
+interface ListPromptsParams {
+  collection_id?: string;
+  workspace_id?: string;
+  current_page?: number;
+  page_size?: number;
+  search?: string;
+}
+
+interface PromptListItem {
+  id: string;
+  name: string;
+  slug: string;
+  collection_id: string;
+  workspace_id?: string;
+  model?: string;
+  status?: string;
+  created_at: string;
+  last_updated_at: string;
+  object: 'prompt';
+}
+
+interface ListPromptsResponse {
+  data: PromptListItem[];
+  total: number;
+  object: 'list';
+}
+
+// Get Prompt
+interface PromptVersion {
+  id: string;
+  version_number: number;
+  version_description?: string;
+  string: PromptMessage[];
+  parameters: PromptParameter[];
+  model?: string;
+  virtual_key?: string;
+  functions?: PromptFunctionDefinition[];
+  tools?: PromptToolDefinition[];
+  tool_choice?: ToolChoice;
+  template_metadata?: PromptTemplateMetadata;
+  created_at: string;
+}
+
+interface GetPromptResponse {
+  id: string;
+  name: string;
+  slug: string;
+  collection_id: string;
+  workspace_id?: string;
+  created_at: string;
+  last_updated_at: string;
+  current_version: PromptVersion;
+  versions: PromptVersion[];
+  object: 'prompt';
+}
+
+// Update Prompt
+interface UpdatePromptRequest {
+  name?: string;
+  collection_id?: string;
+  string?: PromptMessage[];
+  parameters?: PromptParameter[];
+  model?: string;
+  virtual_key?: string;
+  functions?: PromptFunctionDefinition[];
+  tools?: PromptToolDefinition[];
+  tool_choice?: ToolChoice;
+  version_description?: string;
+  template_metadata?: PromptTemplateMetadata;
+}
+
+interface UpdatePromptResponse {
+  id: string;
+  slug: string;
+  prompt_version_id: string;
+  object: 'prompt';
+}
+
+// Render Prompt
+interface RenderPromptRequest {
+  variables: Record<string, string | number | boolean>;
+  hyperparameters?: PromptHyperparameters;
+}
+
+interface PromptHyperparameters {
+  max_tokens?: number;
+  temperature?: number;
+  top_p?: number;
+  top_k?: number;
+  presence_penalty?: number;
+  frequency_penalty?: number;
+  stop?: string[];
+}
+
+interface RenderPromptResponse {
+  success: boolean;
+  data: {
+    messages: PromptMessage[];
+    model?: string;
+    max_tokens?: number;
+    temperature?: number;
+    top_p?: number;
+    [key: string]: unknown;
+  };
+}
+
+// Prompt Completions
+interface BillingMetadata {
+  client_id: string;
+  app: string;
+  env: string;
+  project_id?: string;
+  feature?: string;
+  prompt_slug?: string;
+  prompt_version?: string;
+  [key: string]: unknown;
+}
+
+interface PromptCompletionRequest {
+  variables: Record<string, string | number | boolean>;
+  metadata?: BillingMetadata;
+  stream?: boolean;
+  hyperparameters?: PromptHyperparameters;
+}
+
+interface PromptCompletionChoice {
+  index: number;
+  message: {
+    role: string;
+    content: string;
+  };
+  finish_reason: string;
+}
+
+interface PromptCompletionUsage {
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+}
+
+interface PromptCompletionResponse {
+  id: string;
+  object: 'chat.completion';
+  created: number;
+  model: string;
+  choices: PromptCompletionChoice[];
+  usage: PromptCompletionUsage;
+}
+
+// Migrate Prompt
+interface MigratePromptRequest {
+  name: string;
+  app: string;
+  env: string;
+  collection_id: string;
+  string: PromptMessage[];
+  parameters: PromptParameter[];
+  virtual_key: string;
+  model?: string;
+  version_description?: string;
+  template_metadata?: PromptTemplateMetadata;
+  functions?: PromptFunctionDefinition[];
+  tools?: PromptToolDefinition[];
+  tool_choice?: ToolChoice;
+  dry_run?: boolean;
+}
+
+interface MigratePromptResponse {
+  action: 'created' | 'updated' | 'unchanged';
+  prompt_id: string;
+  slug: string;
+  version_id?: string;
+  dry_run: boolean;
+  message: string;
+}
+
+// Promote Prompt
+interface PromotePromptRequest {
+  source_prompt_id: string;
+  target_collection_id: string;
+  target_name?: string;
+  target_env: string;
+}
+
+interface PromotePromptResponse {
+  source_prompt_id: string;
+  source_version_id: string;
+  target_prompt_id: string;
+  target_version_id: string;
+  action: 'created' | 'updated';
+  promoted_at: string;
+}
+
+// Metadata Validation
+interface ValidateMetadataResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
 export class PortkeyService {
   private readonly apiKey: string;
   private readonly baseUrl = 'https://api.portkey.ai/v1';
@@ -535,5 +834,503 @@ export class PortkeyService {
       console.error('PortkeyService Error:', error);
       throw new Error('Failed to fetch configuration details from Portkey API');
     }
+  }
+
+  // ============================================
+  // Collection Methods (App Grouping)
+  // ============================================
+
+  async listCollections(params?: ListCollectionsParams): Promise<ListCollectionsResponse> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.workspace_id) queryParams.append('workspace_id', params.workspace_id);
+      if (params?.current_page) queryParams.append('current_page', params.current_page.toString());
+      if (params?.page_size) queryParams.append('page_size', params.page_size.toString());
+      if (params?.search) queryParams.append('search', params.search);
+
+      const url = `${this.baseUrl}/prompts/collections${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as ListCollectionsResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error('Failed to fetch collections from Portkey API');
+    }
+  }
+
+  async createCollection(data: CreateCollectionRequest): Promise<CreateCollectionResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/prompts/collections`, {
+        method: 'POST',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as CreateCollectionResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to create collection: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getCollection(collectionId: string): Promise<Collection> {
+    try {
+      const response = await fetch(`${this.baseUrl}/prompts/collections/${collectionId}`, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`Collection not found: ${collectionId}`);
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as Collection;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to fetch collection: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // ============================================
+  // Prompt Admin Methods
+  // ============================================
+
+  async createPrompt(data: CreatePromptRequest): Promise<CreatePromptResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/prompts`, {
+        method: 'POST',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as CreatePromptResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to create prompt: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async listPrompts(params?: ListPromptsParams): Promise<ListPromptsResponse> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.collection_id) queryParams.append('collection_id', params.collection_id);
+      if (params?.workspace_id) queryParams.append('workspace_id', params.workspace_id);
+      if (params?.current_page) queryParams.append('current_page', params.current_page.toString());
+      if (params?.page_size) queryParams.append('page_size', params.page_size.toString());
+      if (params?.search) queryParams.append('search', params.search);
+
+      const url = `${this.baseUrl}/prompts${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as ListPromptsResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error('Failed to fetch prompts from Portkey API');
+    }
+  }
+
+  async getPrompt(promptId: string): Promise<GetPromptResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/prompts/${promptId}`, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`Prompt not found: ${promptId}`);
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as GetPromptResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to fetch prompt: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async updatePrompt(promptId: string, data: UpdatePromptRequest): Promise<UpdatePromptResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/prompts/${promptId}`, {
+        method: 'PUT',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as UpdatePromptResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to update prompt: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async renderPrompt(promptId: string, data: RenderPromptRequest): Promise<RenderPromptResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/prompts/${promptId}/render`, {
+        method: 'POST',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as RenderPromptResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to render prompt: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async runPromptCompletion(promptId: string, data: PromptCompletionRequest): Promise<PromptCompletionResponse> {
+    try {
+      // Validate required billing metadata
+      if (data.metadata) {
+        const validationResult = this.validateBillingMetadata(data.metadata);
+        if (!validationResult.valid) {
+          throw new Error(`Billing metadata validation failed: ${validationResult.errors.join(', ')}`);
+        }
+      }
+
+      const response = await fetch(`${this.baseUrl}/prompts/${promptId}/completions`, {
+        method: 'POST',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          variables: data.variables,
+          metadata: data.metadata,
+          stream: false, // Force non-streaming for MCP tool response
+          ...data.hyperparameters
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as PromptCompletionResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to run prompt completion: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // ============================================
+  // Migration & Promotion Methods
+  // ============================================
+
+  async migratePrompt(data: MigratePromptRequest): Promise<MigratePromptResponse> {
+    const { dry_run = false, app, env, ...promptData } = data;
+
+    try {
+      // Search for existing prompt by name in the collection
+      const existingPrompts = await this.listPrompts({
+        collection_id: data.collection_id,
+        search: data.name
+      });
+
+      // Find exact name match
+      const existingPrompt = existingPrompts.data.find(
+        p => p.name.toLowerCase() === data.name.toLowerCase()
+      );
+
+      if (existingPrompt) {
+        // Prompt exists - check if update is needed
+        const currentPrompt = await this.getPrompt(existingPrompt.id);
+        const currentVersion = currentPrompt.current_version;
+
+        // Compare template content to detect changes
+        const templateChanged = JSON.stringify(currentVersion.string) !== JSON.stringify(data.string);
+        const parametersChanged = JSON.stringify(currentVersion.parameters) !== JSON.stringify(data.parameters);
+        const modelChanged = data.model !== undefined && currentVersion.model !== data.model;
+
+        const needsUpdate = templateChanged || parametersChanged || modelChanged;
+
+        if (!needsUpdate) {
+          return {
+            action: 'unchanged',
+            prompt_id: existingPrompt.id,
+            slug: existingPrompt.slug,
+            dry_run,
+            message: `Prompt "${data.name}" already exists and is up to date`
+          };
+        }
+
+        if (dry_run) {
+          return {
+            action: 'updated',
+            prompt_id: existingPrompt.id,
+            slug: existingPrompt.slug,
+            dry_run: true,
+            message: `Would update prompt "${data.name}" (changes detected)`
+          };
+        }
+
+        // Perform update with app/env metadata
+        const updateResult = await this.updatePrompt(existingPrompt.id, {
+          string: data.string,
+          parameters: data.parameters,
+          model: data.model,
+          virtual_key: data.virtual_key,
+          version_description: data.version_description,
+          template_metadata: {
+            ...data.template_metadata,
+            app,
+            env,
+            migrated_at: new Date().toISOString()
+          },
+          functions: data.functions,
+          tools: data.tools,
+          tool_choice: data.tool_choice
+        });
+
+        return {
+          action: 'updated',
+          prompt_id: updateResult.id,
+          slug: updateResult.slug,
+          version_id: updateResult.prompt_version_id,
+          dry_run: false,
+          message: `Updated prompt "${data.name}" with new version`
+        };
+      }
+
+      // Prompt does not exist - create it
+      if (dry_run) {
+        return {
+          action: 'created',
+          prompt_id: '',
+          slug: '',
+          dry_run: true,
+          message: `Would create new prompt "${data.name}"`
+        };
+      }
+
+      const createResult = await this.createPrompt({
+        name: data.name,
+        collection_id: data.collection_id,
+        string: data.string,
+        parameters: data.parameters,
+        virtual_key: data.virtual_key,
+        model: data.model,
+        version_description: data.version_description,
+        template_metadata: {
+          ...data.template_metadata,
+          app,
+          env,
+          migrated_at: new Date().toISOString()
+        },
+        functions: data.functions,
+        tools: data.tools,
+        tool_choice: data.tool_choice
+      });
+
+      return {
+        action: 'created',
+        prompt_id: createResult.id,
+        slug: createResult.slug,
+        version_id: createResult.version_id,
+        dry_run: false,
+        message: `Created new prompt "${data.name}"`
+      };
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to migrate prompt: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async promotePrompt(data: PromotePromptRequest): Promise<PromotePromptResponse> {
+    try {
+      // Get the source prompt
+      const sourcePrompt = await this.getPrompt(data.source_prompt_id);
+      const sourceVersion = sourcePrompt.current_version;
+
+      // Determine target name (append env suffix if not provided)
+      const targetName = data.target_name || sourcePrompt.name.replace(/-staging$|-dev$/, '') + `-${data.target_env}`;
+
+      // Search for existing target prompt in target collection
+      const existingTargets = await this.listPrompts({
+        collection_id: data.target_collection_id,
+        search: targetName
+      });
+
+      const existingTarget = existingTargets.data.find(
+        p => p.name.toLowerCase() === targetName.toLowerCase()
+      );
+
+      if (existingTarget) {
+        // Update existing target prompt with source version content
+        const updateResult = await this.updatePrompt(existingTarget.id, {
+          string: sourceVersion.string,
+          parameters: sourceVersion.parameters,
+          model: sourceVersion.model,
+          virtual_key: sourceVersion.virtual_key,
+          functions: sourceVersion.functions,
+          tools: sourceVersion.tools,
+          tool_choice: sourceVersion.tool_choice,
+          version_description: `Promoted from ${sourcePrompt.slug} v${sourceVersion.version_number}`,
+          template_metadata: {
+            ...sourceVersion.template_metadata,
+            env: data.target_env,
+            promoted_from: sourcePrompt.slug,
+            promoted_from_version: sourceVersion.version_number.toString(),
+            promoted_at: new Date().toISOString()
+          }
+        });
+
+        return {
+          source_prompt_id: data.source_prompt_id,
+          source_version_id: sourceVersion.id,
+          target_prompt_id: updateResult.id,
+          target_version_id: updateResult.prompt_version_id,
+          action: 'updated',
+          promoted_at: new Date().toISOString()
+        };
+      }
+
+      // Create new target prompt
+      const createResult = await this.createPrompt({
+        name: targetName,
+        collection_id: data.target_collection_id,
+        string: sourceVersion.string,
+        parameters: sourceVersion.parameters,
+        virtual_key: sourceVersion.virtual_key || '',
+        model: sourceVersion.model,
+        functions: sourceVersion.functions,
+        tools: sourceVersion.tools,
+        tool_choice: sourceVersion.tool_choice,
+        version_description: `Promoted from ${sourcePrompt.slug} v${sourceVersion.version_number}`,
+        template_metadata: {
+          ...sourceVersion.template_metadata,
+          env: data.target_env,
+          promoted_from: sourcePrompt.slug,
+          promoted_from_version: sourceVersion.version_number.toString(),
+          promoted_at: new Date().toISOString()
+        }
+      });
+
+      return {
+        source_prompt_id: data.source_prompt_id,
+        source_version_id: sourceVersion.id,
+        target_prompt_id: createResult.id,
+        target_version_id: createResult.version_id,
+        action: 'created',
+        promoted_at: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to promote prompt: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // ============================================
+  // Metadata Validation
+  // ============================================
+
+  validateBillingMetadata(metadata: Partial<BillingMetadata>): ValidateMetadataResult {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+
+    // Required fields
+    if (!metadata.client_id) {
+      errors.push('Missing required field: client_id');
+    }
+    if (!metadata.app) {
+      errors.push('Missing required field: app');
+    }
+    if (!metadata.env) {
+      errors.push('Missing required field: env');
+    }
+
+    // Validate app value
+    const validApps = ['hourlink', 'apizone', 'research-pilot'];
+    if (metadata.app && !validApps.includes(metadata.app)) {
+      warnings.push(`Unrecognized app: "${metadata.app}". Expected one of: ${validApps.join(', ')}`);
+    }
+
+    // Validate env value
+    const validEnvs = ['dev', 'staging', 'prod'];
+    if (metadata.env && !validEnvs.includes(metadata.env)) {
+      warnings.push(`Unrecognized env: "${metadata.env}". Expected one of: ${validEnvs.join(', ')}`);
+    }
+
+    // Optional but recommended
+    if (!metadata.project_id) {
+      warnings.push('Missing recommended field: project_id (helps with billing attribution)');
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+      warnings
+    };
   }
 } 

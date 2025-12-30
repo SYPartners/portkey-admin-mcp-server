@@ -101,6 +101,98 @@ This MCP server provides comprehensive access to Portkey's platform through the 
 - **Virtual Key Details**: Monitor key status, usage limits, and rate limits
 - **API Integration**: Track API endpoints and their configurations
 
+### Prompt Admin (New!)
+- **Collection Management**: Organize prompts by app using collections
+- **Prompt CRUD**: Create, list, get, and update prompt templates
+- **Version Control**: Automatic versioning on prompt updates
+- **Template Rendering**: Preview rendered prompts with variables
+- **Prompt Completions**: Execute prompts with billing metadata tracking
+- **Migration Helper**: Create-or-update prompts with app/env support
+- **Environment Promotion**: Promote prompts from staging to production
+- **Billing Validation**: Enforce required metadata for cost attribution
+
+## Prompt Admin Tools
+
+This fork adds 12 new tools for managing Portkey prompts with app grouping, environment promotion, and billing metadata validation.
+
+### Collection Tools (App Grouping)
+
+| Tool | Description |
+|------|-------------|
+| `list_collections` | List all collections with optional workspace filtering |
+| `create_collection` | Create a new collection to group prompts by app |
+| `get_collection` | Get collection details by ID |
+
+### Prompt CRUD Tools
+
+| Tool | Description |
+|------|-------------|
+| `create_prompt` | Create a new prompt template with messages and parameters |
+| `list_prompts` | List prompts with optional collection/workspace filtering |
+| `get_prompt` | Get prompt details including version history |
+| `update_prompt` | Update prompt (creates new version automatically) |
+| `render_prompt` | Preview rendered template with variables (no model call) |
+| `run_prompt_completion` | Execute prompt and get completion with billing metadata |
+
+### Migration & Promotion Tools
+
+| Tool | Description |
+|------|-------------|
+| `migrate_prompt` | Create-or-update helper with app/env support and dry_run mode |
+| `promote_prompt` | Copy prompt version from staging to production |
+| `validate_completion_metadata` | Validate billing metadata before completion |
+
+### Billing Metadata Schema
+
+When running prompt completions, the following metadata is required for cost attribution:
+
+| Field | Required | Description | Example |
+|-------|----------|-------------|---------|
+| `client_id` | Yes | Client identifier for billing | `"acme-corp"` |
+| `app` | Yes | Application name | `"hourlink"` |
+| `env` | Yes | Environment | `"prod"` |
+| `project_id` | No | Project identifier | `"proj-123"` |
+| `feature` | No | Feature name | `"event-classification"` |
+
+### Example Usage
+
+**Create a collection for an app:**
+```bash
+# Using Claude Code MCP
+"Create a collection called 'hourlink' for our hourlink app prompts"
+```
+
+**Create a prompt with parameters:**
+```bash
+# Using Claude Code MCP
+"Create a prompt called 'event-classifier' in the hourlink collection with:
+- System message: 'You are an event classifier'
+- User message template: 'Classify this event: {{event_description}}'
+- Parameter: event_description (string, required)"
+```
+
+**Migrate a prompt with environment tagging:**
+```bash
+# Using Claude Code MCP
+"Migrate the event-classifier prompt to staging environment in the hourlink app"
+```
+
+**Promote from staging to production:**
+```bash
+# Using Claude Code MCP
+"Promote the event-classifier prompt from staging to production"
+```
+
+**Run a completion with billing metadata:**
+```bash
+# Using Claude Code MCP
+"Run the event-classifier prompt with:
+- event_description: 'Team meeting scheduled for Monday'
+- client_id: 'acme-corp'
+- app: 'hourlink'
+- env: 'prod'"
+```
+
 ## License
 
 This project is licensed under the ISC License - see the LICENSE file for details
