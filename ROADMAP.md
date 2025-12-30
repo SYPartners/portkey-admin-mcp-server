@@ -14,7 +14,7 @@
 | Phase | Category | Tools | Status | PR |
 |-------|----------|-------|--------|-----|
 | 0 | Prompt Admin (existing) | 12 | ✅ Complete | [#1](https://github.com/SYPartners/portkey-admin-mcp-server/pull/1) |
-| 1 | Core Admin CRUD | 24 | ✅ Complete | - |
+| 1 | Core Admin CRUD | 24 | ✅ Complete | [#4](https://github.com/SYPartners/portkey-admin-mcp-server/pull/4) |
 | 2 | Governance & Security | 20 | Pending | - |
 | 3 | Prompt Enhancements | 14 | Pending | - |
 | 4 | Observability | 23 | Pending | - |
