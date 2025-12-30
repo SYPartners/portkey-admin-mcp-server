@@ -1075,10 +1075,10 @@ export class PortkeyService {
           'Accept': 'application/json'
         },
         body: JSON.stringify({
+          ...data.hyperparameters, // Spread FIRST so explicit props below always win
           variables: data.variables,
           metadata: data.metadata,
-          stream: false, // Force non-streaming for MCP tool response
-          ...data.hyperparameters
+          stream: false // Force non-streaming for MCP tool response
         })
       });
 

@@ -82,14 +82,14 @@ Applied to:
 - `UpdatePromptRequest`
 - `MigratePromptRequest`
 
-#### Fix B: Reversed hyperparameters spread order (Issue 2)
-Changed from spreading hyperparameters first (could overwrite explicit props) to spreading last:
+#### Fix B: Fixed hyperparameters spread order (Issue 2)
+Changed from spreading hyperparameters LAST (could overwrite explicit props) to spreading FIRST:
 ```typescript
 body: JSON.stringify({
+  ...data.hyperparameters,  // Spread FIRST so explicit props below always win
   variables: data.variables,
   metadata: data.metadata,
-  stream: false,
-  ...data.hyperparameters  // Now spreads LAST
+  stream: false
 })
 ```
 
