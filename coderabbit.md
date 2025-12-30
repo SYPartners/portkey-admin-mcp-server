@@ -2,151 +2,121 @@
 
 ## Validation Summary
 
-| # | Issue | Verdict | Action | Commit |
-|---|-------|---------|--------|--------|
-| 1 | `string` typed as array | **VALID** | Fixed - changed to `string: string` | pending |
-| 2 | Hyperparameters spread order | **VALID** | Fixed - reversed spread order | pending |
-| 3 | Unused `promptData` | Already fixed | - | `8007585` |
-| 4 | Empty `virtual_key` fallback | Already fixed | - | `8007585` |
-| 5 | z.enum for app/env | Already fixed | - | `8007585` |
-| 6 | `\|\|` vs `??` | **VALID (style)** | Fixed - use `??` for consistency | pending |
-| 7 | Regex missing `-prod` | Already fixed | - | `31778c1` |
-| 8 | Hardcoded validApps/validEnvs | **FALSE POSITIVE** | Rejected - single-use, clear inline | - |
-| 9 | JSON.stringify comparison | **FALSE POSITIVE** | Rejected - works for flat structures | - |
-| 10 | Missing comment on `string` | **VALID** | Fixed - added JSDoc comments | pending |
-| 11 | ROADMAP status | Already fixed | - | `be3e9d2` |
+| # | Issue | File | Verdict | Status |
+|---|-------|------|---------|--------|
+| 1 | `string` typed as array | portkey.service.ts:351 | **VALID** | Fixed |
+| 2 | Hyperparameters spread order | portkey.service.ts:1083 | **VALID** | Fixed |
+| 3 | Unused `promptData` variable | portkey.service.ts:1103 | **VALID** | Fixed |
+| 4 | Empty `virtual_key` fallback | portkey.service.ts:1294 | **VALID** | Fixed |
+| 5 | z.enum for app/env in BillingMetadata | index.ts:533 | **VALID** | Fixed |
+| 6 | Empty `choices` array check | index.ts:848 | **VALID** | Fixed |
+| 7 | ROADMAP status "Merged" | ROADMAP.md:16 | **VALID** | Fixed |
+| 8 | Hardcoded validApps/validEnvs | portkey.service.ts | **FALSE POSITIVE** | Rejected |
+| 9 | JSON.stringify comparison | portkey.service.ts:1111 | **FALSE POSITIVE** | Rejected |
+| 10 | Partial API key in logs | api-validation.ts:52 | **VALID** | Fixed |
+| 11 | Missing billing metadata in test | api-validation.ts:199 | **VALID** | Fixed |
+| 12 | dry_run preview array assumptions | index.ts:570-572 | **VALID** | Fixed |
+| 13 | validate_completion_metadata z.enum | index.ts:992-998 | **VALID** | Fixed |
+| 14 | Test assertions expect array | api-validation.ts:162-171 | **VALID** | Fixed |
 
-**Fixed: 9 | Rejected (False Positive): 2**
-
----
-
-## Issue 1: CodeRabbit Was Correct
-
-After API testing, we confirmed CodeRabbit was RIGHT:
-- `string` field should be a **plain template string** with mustache `{{variable}}` syntax
-- `parameters` field should be a **Record<string, unknown>** of default values
-
-The array format was incorrect:
-```typescript
-// WRONG (what we had):
-string: [{ role: 'system', content: '...' }]
-parameters: [{ name: 'x', type: 'string' }]
-
-// CORRECT (what the API expects):
-string: 'You are a helpful assistant. {{name}}'
-parameters: { name: 'default_value' }
-```
-
-API testing confirmed:
-- Array format → 400 Bad Request "Invalid value"
-- String format → 200 OK, prompt created successfully
+**Fixed: 12 | Rejected (False Positive): 2**
 
 ---
 
-## False Positives Explained
+## Issue Details
 
-### Issue 8: Hardcoded validApps/validEnvs - REJECTED
-Extracting to constants provides no benefit:
-- Values are only used once per variable inside a single method
-- Already clearly named (`validApps`, `validEnvs`) with immediate context
-- Would reduce clarity by separating constants from their usage
+### Issue 1: `string` field type (VALID - Fixed)
+CodeRabbit correctly identified that the `string` field should be a plain template string, not an array.
 
-### Issue 9: JSON.stringify comparison - REJECTED
-Works correctly for this use case:
-- Data comes from structured API responses with consistent property ordering
-- Sufficient for this domain's requirements
+**API Testing confirmed:**
+- Array format `{"string": [{"role": "system", ...}]}` → 400 Bad Request
+- String format `{"string": "You are a helper. {{name}}"}` → 200 OK
 
----
-
-## Fixes Applied
-
-### File: `src/services/portkey.service.ts`
-
-#### Fix A: Changed `string` and `parameters` types (Issue 1)
-Changed in all relevant interfaces:
-```typescript
-// BEFORE:
-string: PromptMessage[];
-parameters: PromptParameter[];
-
-// AFTER:
-/** Prompt template string with {{variable}} mustache syntax */
-string: string;
-/** Default values for template variables */
-parameters: Record<string, unknown>;
-```
-
-Applied to:
-- `CreatePromptRequest`
-- `PromptVersion`
-- `UpdatePromptRequest`
-- `MigratePromptRequest`
-
-#### Fix B: Fixed hyperparameters spread order (Issue 2)
-Changed from spreading hyperparameters LAST (could overwrite explicit props) to spreading FIRST:
+### Issue 2: Hyperparameters spread order (VALID - Fixed)
+Spreading `hyperparameters` LAST could overwrite explicit props. Fixed by spreading FIRST:
 ```typescript
 body: JSON.stringify({
-  ...data.hyperparameters,  // Spread FIRST so explicit props below always win
+  ...data.hyperparameters,  // Spread FIRST
   variables: data.variables,
   metadata: data.metadata,
-  stream: false
+  stream: false  // Explicit props win
 })
 ```
 
----
+### Issue 3: Unused `promptData` (VALID - Fixed)
+Removed unused destructured variable in `migratePrompt()`.
 
-### File: `src/index.ts`
-
-#### Fix C: Updated Zod schemas for correct types (Issue 1)
-Changed in `create_prompt`, `update_prompt`, and `migrate_prompt` tool schemas:
+### Issue 4: Empty `virtual_key` fallback (VALID - Fixed)
+Added validation before using `virtual_key`:
 ```typescript
-// BEFORE:
-string: z.array(PromptMessageSchema).describe("...")
-parameters: z.array(PromptParameterSchema).describe("...")
-
-// AFTER:
-string: z.string().describe("Prompt template string with {{variable}} mustache syntax")
-parameters: z.record(z.unknown()).describe("Default values for template variables")
-```
-
-#### Fix D: Changed `||` to `??` for consistency (Issue 6)
-```typescript
-prompt_id: result.prompt_id ?? undefined,
-slug: result.slug ?? undefined,
-version_id: result.version_id ?? undefined
-```
-
----
-
-### File: `tests/api-validation.ts`
-
-#### Fix E: Updated test to use correct format
-Changed test to validate the correct API schema:
-```typescript
-// Now uses:
-string: 'You are a helpful assistant. The user name is {{name}}.\n\nQuestion: {{question}}',
-parameters: {
-  name: 'User',
-  question: 'What is 2+2?'
+const virtualKey = data.virtual_key || sourceVersion.virtual_key;
+if (!virtualKey) {
+  throw new Error('Cannot promote prompt: source version has no virtual_key');
 }
 ```
 
-#### Fix F: Updated Get Prompt test assertions
-Changed test from expecting array to expecting string:
-```typescript
-// BEFORE:
-await test('Get Prompt (verify string field returned as array)', async () => {
-  const messages = response.current_version?.string;
-  if (Array.isArray(messages) && messages.length > 0) {
-    console.log(`First message role: ${messages[0].role}`);
-  }
-});
+### Issue 5: z.enum for BillingMetadata (VALID - Fixed)
+Changed `app` and `env` from `z.string()` to `z.enum([...])`.
 
-// AFTER:
-await test('Get Prompt (verify string field is template string)', async () => {
-  const templateString = response.current_version?.string;
-  if (typeof templateString === 'string' && templateString.length > 0) {
-    console.log(`Template preview: ${templateString.slice(0, 100)}...`);
-  }
-});
+### Issue 6: Empty choices array (VALID - Fixed)
+Added optional chaining with nullish coalescing:
+```typescript
+response: result.choices?.[0]?.message?.content ?? null,
 ```
+
+### Issue 7: ROADMAP status (VALID - Fixed)
+Changed from "Merged" to "In Review".
+
+### Issue 8: Hardcoded validApps/validEnvs (FALSE POSITIVE - Rejected)
+Single-use constants with clear naming don't benefit from extraction.
+
+### Issue 9: JSON.stringify comparison (FALSE POSITIVE - Rejected)
+Works for structured API responses with consistent ordering.
+
+### Issue 10: Partial API key in logs (VALID - Fixed)
+Changed from logging partial key to `[REDACTED]`.
+
+### Issue 11: Missing billing metadata in test (VALID - Fixed)
+Added required `metadata` with `client_id`, `app`, `env` to completion test.
+
+### Issue 12: dry_run preview assumptions (VALID - Fixed)
+Changed from array-based to string-based field access:
+```typescript
+template_length: params.string.length,
+parameter_count: Object.keys(params.parameters ?? {}).length
+```
+
+### Issue 13: validate_completion_metadata z.enum (VALID - Fixed)
+Changed `app` and `env` to use same enum as `BillingMetadataSchema`:
+```typescript
+app: z.enum(['hourlink', 'apizone', 'research-pilot']).optional()
+env: z.enum(['dev', 'staging', 'prod']).optional()
+```
+
+### Issue 14: Test assertions expect array (VALID - Fixed)
+Updated test name and assertions to expect string instead of array.
+
+---
+
+## Files Modified
+
+### `src/services/portkey.service.ts`
+- Fixed `string` and `parameters` types in interfaces
+- Fixed hyperparameters spread order
+- Removed unused `promptData` variable
+- Added `virtual_key` validation
+
+### `src/index.ts`
+- Updated Zod schemas for `string` and `parameters`
+- Changed `||` to `??` for consistency
+- Fixed dry_run preview field access
+- Fixed validate_completion_metadata schema
+
+### `tests/api-validation.ts`
+- Updated test format for correct schema
+- Fixed test assertions for string field
+- Redacted API key from logs
+- Added billing metadata to completion test
+
+### `ROADMAP.md`
+- Changed status from "Merged" to "In Review"

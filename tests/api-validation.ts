@@ -49,7 +49,7 @@ async function main() {
     console.error('ERROR: PORTKEY_API_KEY not set in .env');
     process.exit(1);
   }
-  console.log('API Key loaded:', process.env.PORTKEY_API_KEY.slice(0, 8) + '...');
+  console.log('API Key loaded: [REDACTED]');
 
   // Store IDs for cleanup
   let workspaceId: string | undefined;
@@ -192,6 +192,11 @@ async function main() {
       variables: {
         name: 'TestUser',
         question: 'What is 2+2? Answer in one word.'
+      },
+      metadata: {
+        client_id: 'test-client',
+        app: 'research-pilot',
+        env: 'dev'
       }
     });
     console.log('Completion response received');
