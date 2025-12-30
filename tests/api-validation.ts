@@ -159,13 +159,13 @@ async function main() {
   // ============================================================
   // Test 6: Get Prompt (verify structure)
   // ============================================================
-  await test('Get Prompt (verify string field returned as array)', async () => {
+  await test('Get Prompt (verify string field is template string)', async () => {
     const response = await portkey.getPrompt(promptId!);
-    const messages = response.current_version?.string;
-    console.log(`Messages type: ${Array.isArray(messages) ? 'array' : typeof messages}`);
-    console.log(`Messages count: ${messages?.length}`);
-    if (Array.isArray(messages) && messages.length > 0) {
-      console.log(`First message role: ${messages[0].role}`);
+    const templateString = response.current_version?.string;
+    console.log(`String type: ${typeof templateString}`);
+    console.log(`String length: ${templateString?.length ?? 0}`);
+    if (typeof templateString === 'string' && templateString.length > 0) {
+      console.log(`Template preview: ${templateString.slice(0, 100)}...`);
     }
     return response;
   });

@@ -130,3 +130,23 @@ parameters: {
   question: 'What is 2+2?'
 }
 ```
+
+#### Fix F: Updated Get Prompt test assertions
+Changed test from expecting array to expecting string:
+```typescript
+// BEFORE:
+await test('Get Prompt (verify string field returned as array)', async () => {
+  const messages = response.current_version?.string;
+  if (Array.isArray(messages) && messages.length > 0) {
+    console.log(`First message role: ${messages[0].role}`);
+  }
+});
+
+// AFTER:
+await test('Get Prompt (verify string field is template string)', async () => {
+  const templateString = response.current_version?.string;
+  if (typeof templateString === 'string' && templateString.length > 0) {
+    console.log(`Template preview: ${templateString.slice(0, 100)}...`);
+  }
+});
+```

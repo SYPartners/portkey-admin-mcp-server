@@ -567,8 +567,8 @@ server.tool(
                 name: params.name,
                 collection_id: params.collection_id,
                 model: params.model,
-                message_count: params.string.length,
-                parameter_count: params.parameters.length
+                template_length: params.string.length,
+                parameter_count: Object.keys(params.parameters ?? {}).length
               }
             }, null, 2)
           }]
@@ -991,8 +991,8 @@ server.tool(
   "Validate billing metadata before running a completion. Checks for required fields (client_id, app, env) and valid values.",
   {
     client_id: z.string().optional().describe("Client ID for billing attribution"),
-    app: z.string().optional().describe("App identifier: hourlink, apizone, research-pilot"),
-    env: z.string().optional().describe("Environment: dev, staging, prod"),
+    app: z.enum(['hourlink', 'apizone', 'research-pilot']).optional().describe("App identifier"),
+    env: z.enum(['dev', 'staging', 'prod']).optional().describe("Environment"),
     project_id: z.string().optional().describe("Project ID for granular billing"),
     feature: z.string().optional().describe("Feature name for tracking")
   },
