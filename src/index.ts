@@ -833,19 +833,20 @@ server.tool(
         stream: false
       });
 
+      const choice = result.choices?.[0];
       return {
         content: [{
           type: "text",
           text: JSON.stringify({
             id: result.id,
             model: result.model,
-            response: result.choices[0]?.message.content,
-            finish_reason: result.choices[0]?.finish_reason,
-            usage: {
+            response: choice?.message?.content ?? null,
+            finish_reason: choice?.finish_reason ?? null,
+            usage: result.usage ? {
               prompt_tokens: result.usage.prompt_tokens,
               completion_tokens: result.usage.completion_tokens,
               total_tokens: result.usage.total_tokens
-            }
+            } : null
           }, null, 2)
         }]
       };
