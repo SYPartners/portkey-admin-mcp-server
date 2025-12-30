@@ -258,6 +258,230 @@ interface GetConfigResponse {
 }
 
 // ============================================
+// Phase 1: Core Admin CRUD Interfaces
+// ============================================
+
+// Config Management
+interface CreateConfigRequest {
+  name: string;
+  config: Record<string, unknown>;
+  is_default?: number;
+  workspace_id?: string;
+}
+
+interface UpdateConfigRequest {
+  name?: string;
+  config?: Record<string, unknown>;
+  is_default?: number;
+}
+
+interface ConfigVersion {
+  id: string;
+  version_number: number;
+  config: Record<string, unknown>;
+  created_at: string;
+  updated_by?: string;
+}
+
+interface ListConfigVersionsResponse {
+  data: ConfigVersion[];
+  total: number;
+  object: 'list';
+}
+
+// API Keys
+interface CreateApiKeyRequest {
+  name: string;
+  type?: string;
+  scopes?: string[];
+  workspace_id?: string;
+  rate_limits?: Array<{
+    type: string;
+    unit: string;
+    value: number;
+  }>;
+  usage_limits?: {
+    credit_limit?: number;
+    alert_threshold?: number;
+    periodic_reset?: string;
+  };
+  expiry?: string;
+  metadata?: Record<string, string>;
+}
+
+interface ApiKey {
+  id: string;
+  name: string;
+  key?: string; // Only returned on create
+  type?: string;
+  scopes?: string[];
+  workspace_id?: string;
+  rate_limits?: Array<{
+    type: string;
+    unit: string;
+    value: number;
+  }>;
+  usage_limits?: {
+    credit_limit?: number;
+    alert_threshold?: number;
+    periodic_reset?: string;
+  };
+  status: string;
+  created_at: string;
+  last_updated_at: string;
+  object: 'api-key';
+}
+
+interface ListApiKeysParams {
+  page_size?: number;
+  current_page?: number;
+  workspace_id?: string;
+}
+
+interface ListApiKeysResponse {
+  data: ApiKey[];
+  total: number;
+  object: 'list';
+}
+
+interface UpdateApiKeyRequest {
+  name?: string;
+  scopes?: string[];
+  rate_limits?: Array<{
+    type: string;
+    unit: string;
+    value: number;
+  }>;
+  usage_limits?: {
+    credit_limit?: number;
+    alert_threshold?: number;
+    periodic_reset?: string;
+  };
+  status?: string;
+}
+
+// Virtual Keys (extends existing)
+interface CreateVirtualKeyRequest {
+  name: string;
+  key: string;
+  provider: string;
+  note?: string;
+  api_key_id?: string;
+  workspace_id?: string;
+  rate_limits?: Array<{
+    type: string;
+    unit: string;
+    value: number;
+  }>;
+  usage_limits?: {
+    credit_limit?: number;
+    alert_threshold?: number;
+    periodic_reset?: string;
+  };
+  model_config?: Record<string, unknown>;
+}
+
+interface UpdateVirtualKeyRequest {
+  name?: string;
+  note?: string;
+  rate_limits?: Array<{
+    type: string;
+    unit: string;
+    value: number;
+  }>;
+  usage_limits?: {
+    credit_limit?: number;
+    alert_threshold?: number;
+    periodic_reset?: string;
+  };
+  model_config?: Record<string, unknown>;
+  status?: string;
+}
+
+interface VirtualKeyResponse {
+  id: string;
+  name: string;
+  slug: string;
+  provider?: string;
+  note?: string;
+  status: string;
+  rate_limits?: Array<{
+    type: string;
+    unit: string;
+    value: number;
+  }>;
+  usage_limits?: {
+    credit_limit?: number;
+    alert_threshold?: number;
+    periodic_reset?: string;
+  };
+  created_at: string;
+  last_updated_at?: string;
+  object: 'virtual-key';
+}
+
+// Workspace Management (extends existing)
+interface CreateWorkspaceRequest {
+  name: string;
+  description?: string;
+  defaults?: {
+    is_default?: number;
+    metadata?: Record<string, string>;
+  };
+}
+
+interface UpdateWorkspaceRequest {
+  name?: string;
+  description?: string;
+  defaults?: {
+    is_default?: number;
+    metadata?: Record<string, string>;
+  };
+}
+
+// Workspace Members
+interface AddWorkspaceMemberRequest {
+  user_id: string;
+  role: 'admin' | 'member' | 'manager';
+}
+
+interface UpdateWorkspaceMemberRequest {
+  role: 'admin' | 'member' | 'manager';
+}
+
+interface WorkspaceMember {
+  id: string;
+  user_id: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  role: 'admin' | 'member' | 'manager';
+  org_role?: string;
+  status: string;
+  created_at: string;
+  last_updated_at?: string;
+  object: 'workspace-member';
+}
+
+interface ListWorkspaceMembersParams {
+  page_size?: number;
+  current_page?: number;
+}
+
+interface ListWorkspaceMembersResponse {
+  data: WorkspaceMember[];
+  total: number;
+  object: 'list';
+}
+
+// User Management (extends existing)
+interface UpdateUserRequest {
+  first_name?: string;
+  last_name?: string;
+  role?: 'admin' | 'member';
+}
+
+// ============================================
 // Collection Interfaces (App Grouping)
 // ============================================
 
@@ -842,6 +1066,586 @@ export class PortkeyService {
     } catch (error) {
       console.error('PortkeyService Error:', error);
       throw new Error('Failed to fetch configuration details from Portkey API');
+    }
+  }
+
+  // ============================================
+  // Phase 1: Config Management Methods
+  // ============================================
+
+  async createConfig(data: CreateConfigRequest): Promise<Config> {
+    try {
+      const response = await fetch(`${this.baseUrl}/configs`, {
+        method: 'POST',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as Config;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to create config: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async updateConfig(configId: string, data: UpdateConfigRequest): Promise<Config> {
+    try {
+      const response = await fetch(`${this.baseUrl}/configs/${configId}`, {
+        method: 'PUT',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as Config;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to update config: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async deleteConfig(configId: string): Promise<void> {
+    try {
+      const response = await fetch(`${this.baseUrl}/configs/${configId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to delete config: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async listConfigVersions(configId: string): Promise<ListConfigVersionsResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/configs/${configId}/versions`, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as ListConfigVersionsResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to list config versions: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // ============================================
+  // Phase 1: API Key Methods
+  // ============================================
+
+  async createApiKey(data: CreateApiKeyRequest): Promise<ApiKey> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api-keys`, {
+        method: 'POST',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as ApiKey;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to create API key: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async listApiKeys(params?: ListApiKeysParams): Promise<ListApiKeysResponse> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.page_size) queryParams.append('page_size', params.page_size.toString());
+      if (params?.current_page) queryParams.append('current_page', params.current_page.toString());
+      if (params?.workspace_id) queryParams.append('workspace_id', params.workspace_id);
+
+      const url = `${this.baseUrl}/api-keys${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as ListApiKeysResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to list API keys: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getApiKey(apiKeyId: string): Promise<ApiKey> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api-keys/${apiKeyId}`, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`API key not found: ${apiKeyId}`);
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as ApiKey;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to get API key: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async updateApiKey(apiKeyId: string, data: UpdateApiKeyRequest): Promise<ApiKey> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api-keys/${apiKeyId}`, {
+        method: 'PUT',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as ApiKey;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to update API key: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async deleteApiKey(apiKeyId: string): Promise<void> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api-keys/${apiKeyId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to delete API key: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // ============================================
+  // Phase 1: Virtual Key Methods
+  // ============================================
+
+  async createVirtualKey(data: CreateVirtualKeyRequest): Promise<VirtualKeyResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/virtual-keys`, {
+        method: 'POST',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as VirtualKeyResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to create virtual key: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getVirtualKey(virtualKeyId: string): Promise<VirtualKeyResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/virtual-keys/${virtualKeyId}`, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`Virtual key not found: ${virtualKeyId}`);
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as VirtualKeyResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to get virtual key: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async updateVirtualKey(virtualKeyId: string, data: UpdateVirtualKeyRequest): Promise<VirtualKeyResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/virtual-keys/${virtualKeyId}`, {
+        method: 'PUT',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as VirtualKeyResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to update virtual key: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async deleteVirtualKey(virtualKeyId: string): Promise<void> {
+    try {
+      const response = await fetch(`${this.baseUrl}/virtual-keys/${virtualKeyId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to delete virtual key: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // ============================================
+  // Phase 1: Workspace Management Methods
+  // ============================================
+
+  async createWorkspace(data: CreateWorkspaceRequest): Promise<Workspace> {
+    try {
+      const response = await fetch(`${this.baseUrl}/admin/workspaces`, {
+        method: 'POST',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as Workspace;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to create workspace: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async updateWorkspace(workspaceId: string, data: UpdateWorkspaceRequest): Promise<Workspace> {
+    try {
+      const response = await fetch(`${this.baseUrl}/admin/workspaces/${workspaceId}`, {
+        method: 'PUT',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as Workspace;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to update workspace: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async deleteWorkspace(workspaceId: string): Promise<void> {
+    try {
+      const response = await fetch(`${this.baseUrl}/admin/workspaces/${workspaceId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to delete workspace: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // ============================================
+  // Phase 1: Workspace Member Methods
+  // ============================================
+
+  async addWorkspaceMember(workspaceId: string, data: AddWorkspaceMemberRequest): Promise<WorkspaceMember> {
+    try {
+      const response = await fetch(`${this.baseUrl}/admin/workspaces/${workspaceId}/members`, {
+        method: 'POST',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as WorkspaceMember;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to add workspace member: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async listWorkspaceMembers(workspaceId: string, params?: ListWorkspaceMembersParams): Promise<ListWorkspaceMembersResponse> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.page_size) queryParams.append('page_size', params.page_size.toString());
+      if (params?.current_page) queryParams.append('current_page', params.current_page.toString());
+
+      const url = `${this.baseUrl}/admin/workspaces/${workspaceId}/members${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as ListWorkspaceMembersResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to list workspace members: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getWorkspaceMember(workspaceId: string, userId: string): Promise<WorkspaceMember> {
+    try {
+      const response = await fetch(`${this.baseUrl}/admin/workspaces/${workspaceId}/members/${userId}`, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`Workspace member not found: ${userId}`);
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as WorkspaceMember;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to get workspace member: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async updateWorkspaceMember(workspaceId: string, userId: string, data: UpdateWorkspaceMemberRequest): Promise<WorkspaceMember> {
+    try {
+      const response = await fetch(`${this.baseUrl}/admin/workspaces/${workspaceId}/members/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as WorkspaceMember;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to update workspace member: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async removeWorkspaceMember(workspaceId: string, userId: string): Promise<void> {
+    try {
+      const response = await fetch(`${this.baseUrl}/admin/workspaces/${workspaceId}/members/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to remove workspace member: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // ============================================
+  // Phase 1: User Management Methods
+  // ============================================
+
+  async getUser(userId: string): Promise<PortkeyUser> {
+    try {
+      const response = await fetch(`${this.baseUrl}/admin/users/${userId}`, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`User not found: ${userId}`);
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as PortkeyUser;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to get user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async updateUser(userId: string, data: UpdateUserRequest): Promise<PortkeyUser> {
+    try {
+      const response = await fetch(`${this.baseUrl}/admin/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as PortkeyUser;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to update user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async deleteUser(userId: string): Promise<void> {
+    try {
+      const response = await fetch(`${this.baseUrl}/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to delete user: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 

@@ -1022,6 +1022,617 @@ server.tool(
   }
 );
 
+// ============================================
+// Phase 1: Config Management Tools
+// ============================================
+
+server.tool(
+  "create_config",
+  "Create a new gateway configuration with routing rules, model settings, and other options",
+  {
+    name: z.string().describe("Name for the new config"),
+    config: z.record(z.unknown()).describe("Configuration object with routing rules, cache settings, etc."),
+    is_default: z.number().optional().describe("Set to 1 to make this the default config"),
+    workspace_id: z.string().optional().describe("Workspace ID to create the config in")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.createConfig({
+        name: params.name,
+        config: params.config,
+        is_default: params.is_default,
+        workspace_id: params.workspace_id
+      });
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error creating config: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "update_config",
+  "Update an existing gateway configuration",
+  {
+    config_id: z.string().describe("Config ID or slug to update"),
+    name: z.string().optional().describe("New name for the config"),
+    config: z.record(z.unknown()).optional().describe("Updated configuration object"),
+    is_default: z.number().optional().describe("Set to 1 to make this the default config")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.updateConfig(params.config_id, {
+        name: params.name,
+        config: params.config,
+        is_default: params.is_default
+      });
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error updating config: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "delete_config",
+  "Delete a gateway configuration",
+  {
+    config_id: z.string().describe("Config ID or slug to delete")
+  },
+  async (params) => {
+    try {
+      await portkeyService.deleteConfig(params.config_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify({ message: `Config ${params.config_id} deleted successfully` }, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error deleting config: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "list_config_versions",
+  "List all versions of a configuration",
+  {
+    config_id: z.string().describe("Config ID or slug to list versions for")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.listConfigVersions(params.config_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error listing config versions: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+// ============================================
+// Phase 1: API Key Tools
+// ============================================
+
+server.tool(
+  "create_api_key",
+  "Create a new API key for accessing Portkey services",
+  {
+    name: z.string().describe("Name for the new API key"),
+    type: z.string().optional().describe("Type of API key"),
+    scopes: z.array(z.string()).optional().describe("Permission scopes for the API key"),
+    workspace_id: z.string().optional().describe("Workspace ID to scope the API key to"),
+    rate_limits: z.array(z.object({
+      type: z.string(),
+      unit: z.string(),
+      value: z.number()
+    })).optional().describe("Rate limiting configuration"),
+    usage_limits: z.object({
+      credit_limit: z.number().optional(),
+      alert_threshold: z.number().optional(),
+      periodic_reset: z.string().optional()
+    }).optional().describe("Usage limits configuration"),
+    expiry: z.string().optional().describe("Expiration date in ISO8601 format"),
+    metadata: z.record(z.string()).optional().describe("Custom metadata key-value pairs")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.createApiKey(params);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error creating API key: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "list_api_keys",
+  "List all API keys in your Portkey organization",
+  {
+    page_size: z.number().positive().optional().describe("Number of results per page"),
+    current_page: z.number().positive().optional().describe("Page number for pagination"),
+    workspace_id: z.string().optional().describe("Filter by workspace ID")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.listApiKeys(params);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error listing API keys: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "get_api_key",
+  "Get details of a specific API key",
+  {
+    api_key_id: z.string().describe("API key ID to retrieve")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.getApiKey(params.api_key_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error getting API key: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "update_api_key",
+  "Update an existing API key",
+  {
+    api_key_id: z.string().describe("API key ID to update"),
+    name: z.string().optional().describe("New name for the API key"),
+    scopes: z.array(z.string()).optional().describe("Updated permission scopes"),
+    rate_limits: z.array(z.object({
+      type: z.string(),
+      unit: z.string(),
+      value: z.number()
+    })).optional().describe("Updated rate limiting configuration"),
+    usage_limits: z.object({
+      credit_limit: z.number().optional(),
+      alert_threshold: z.number().optional(),
+      periodic_reset: z.string().optional()
+    }).optional().describe("Updated usage limits"),
+    status: z.string().optional().describe("API key status (e.g., 'active', 'inactive')")
+  },
+  async (params) => {
+    try {
+      const { api_key_id, ...updateData } = params;
+      const result = await portkeyService.updateApiKey(api_key_id, updateData);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error updating API key: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "delete_api_key",
+  "Delete an API key",
+  {
+    api_key_id: z.string().describe("API key ID to delete")
+  },
+  async (params) => {
+    try {
+      await portkeyService.deleteApiKey(params.api_key_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify({ message: `API key ${params.api_key_id} deleted successfully` }, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error deleting API key: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+// ============================================
+// Phase 1: Virtual Key Tools
+// ============================================
+
+server.tool(
+  "create_virtual_key",
+  "Create a new virtual key to wrap provider API keys with additional controls",
+  {
+    name: z.string().describe("Name for the virtual key"),
+    key: z.string().describe("The actual provider API key to wrap"),
+    provider: z.string().describe("Provider name (e.g., 'openai', 'anthropic', 'azure')"),
+    note: z.string().optional().describe("Optional note or description"),
+    api_key_id: z.string().optional().describe("API key ID to associate with"),
+    workspace_id: z.string().optional().describe("Workspace ID to create the key in"),
+    rate_limits: z.array(z.object({
+      type: z.string(),
+      unit: z.string(),
+      value: z.number()
+    })).optional().describe("Rate limiting configuration"),
+    usage_limits: z.object({
+      credit_limit: z.number().optional(),
+      alert_threshold: z.number().optional(),
+      periodic_reset: z.string().optional()
+    }).optional().describe("Usage limits configuration"),
+    model_config: z.record(z.unknown()).optional().describe("Model-specific configuration")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.createVirtualKey(params);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error creating virtual key: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "get_virtual_key",
+  "Get details of a specific virtual key",
+  {
+    virtual_key_id: z.string().describe("Virtual key ID or slug to retrieve")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.getVirtualKey(params.virtual_key_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error getting virtual key: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "update_virtual_key",
+  "Update an existing virtual key",
+  {
+    virtual_key_id: z.string().describe("Virtual key ID or slug to update"),
+    name: z.string().optional().describe("New name for the virtual key"),
+    note: z.string().optional().describe("Updated note or description"),
+    rate_limits: z.array(z.object({
+      type: z.string(),
+      unit: z.string(),
+      value: z.number()
+    })).optional().describe("Updated rate limiting configuration"),
+    usage_limits: z.object({
+      credit_limit: z.number().optional(),
+      alert_threshold: z.number().optional(),
+      periodic_reset: z.string().optional()
+    }).optional().describe("Updated usage limits"),
+    model_config: z.record(z.unknown()).optional().describe("Updated model-specific configuration"),
+    status: z.string().optional().describe("Virtual key status")
+  },
+  async (params) => {
+    try {
+      const { virtual_key_id, ...updateData } = params;
+      const result = await portkeyService.updateVirtualKey(virtual_key_id, updateData);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error updating virtual key: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "delete_virtual_key",
+  "Delete a virtual key",
+  {
+    virtual_key_id: z.string().describe("Virtual key ID or slug to delete")
+  },
+  async (params) => {
+    try {
+      await portkeyService.deleteVirtualKey(params.virtual_key_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify({ message: `Virtual key ${params.virtual_key_id} deleted successfully` }, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error deleting virtual key: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+// ============================================
+// Phase 1: Workspace Management Tools
+// ============================================
+
+server.tool(
+  "create_workspace",
+  "Create a new workspace in your Portkey organization",
+  {
+    name: z.string().describe("Name for the new workspace"),
+    description: z.string().optional().describe("Description of the workspace"),
+    defaults: z.object({
+      is_default: z.number().optional(),
+      metadata: z.record(z.string()).optional()
+    }).optional().describe("Default settings for the workspace")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.createWorkspace(params);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error creating workspace: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "update_workspace",
+  "Update an existing workspace",
+  {
+    workspace_id: z.string().describe("Workspace ID or slug to update"),
+    name: z.string().optional().describe("New name for the workspace"),
+    description: z.string().optional().describe("Updated description"),
+    defaults: z.object({
+      is_default: z.number().optional(),
+      metadata: z.record(z.string()).optional()
+    }).optional().describe("Updated default settings")
+  },
+  async (params) => {
+    try {
+      const { workspace_id, ...updateData } = params;
+      const result = await portkeyService.updateWorkspace(workspace_id, updateData);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error updating workspace: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "delete_workspace",
+  "Delete a workspace",
+  {
+    workspace_id: z.string().describe("Workspace ID or slug to delete")
+  },
+  async (params) => {
+    try {
+      await portkeyService.deleteWorkspace(params.workspace_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify({ message: `Workspace ${params.workspace_id} deleted successfully` }, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error deleting workspace: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+// ============================================
+// Phase 1: Workspace Member Tools
+// ============================================
+
+server.tool(
+  "add_workspace_member",
+  "Add a user as a member of a workspace",
+  {
+    workspace_id: z.string().describe("Workspace ID or slug"),
+    user_id: z.string().describe("User ID to add as a member"),
+    role: z.enum(['admin', 'member', 'manager']).describe("Role to assign: 'admin' for full access, 'manager' for workspace management, 'member' for basic access")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.addWorkspaceMember(params.workspace_id, {
+        user_id: params.user_id,
+        role: params.role
+      });
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error adding workspace member: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "list_workspace_members",
+  "List all members in a workspace",
+  {
+    workspace_id: z.string().describe("Workspace ID or slug"),
+    page_size: z.number().positive().optional().describe("Number of results per page"),
+    current_page: z.number().positive().optional().describe("Page number for pagination")
+  },
+  async (params) => {
+    try {
+      const { workspace_id, ...queryParams } = params;
+      const result = await portkeyService.listWorkspaceMembers(workspace_id, queryParams);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error listing workspace members: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "get_workspace_member",
+  "Get details of a specific workspace member",
+  {
+    workspace_id: z.string().describe("Workspace ID or slug"),
+    user_id: z.string().describe("User ID of the member to retrieve")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.getWorkspaceMember(params.workspace_id, params.user_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error getting workspace member: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "update_workspace_member",
+  "Update a member's role in a workspace",
+  {
+    workspace_id: z.string().describe("Workspace ID or slug"),
+    user_id: z.string().describe("User ID of the member to update"),
+    role: z.enum(['admin', 'member', 'manager']).describe("New role to assign")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.updateWorkspaceMember(params.workspace_id, params.user_id, {
+        role: params.role
+      });
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error updating workspace member: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "remove_workspace_member",
+  "Remove a member from a workspace",
+  {
+    workspace_id: z.string().describe("Workspace ID or slug"),
+    user_id: z.string().describe("User ID of the member to remove")
+  },
+  async (params) => {
+    try {
+      await portkeyService.removeWorkspaceMember(params.workspace_id, params.user_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify({ message: `Member ${params.user_id} removed from workspace ${params.workspace_id}` }, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error removing workspace member: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+// ============================================
+// Phase 1: User Management Tools
+// ============================================
+
+server.tool(
+  "get_user",
+  "Get details of a specific user in your Portkey organization",
+  {
+    user_id: z.string().describe("User ID to retrieve")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.getUser(params.user_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error getting user: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "update_user",
+  "Update user information in your Portkey organization",
+  {
+    user_id: z.string().describe("User ID to update"),
+    first_name: z.string().optional().describe("New first name"),
+    last_name: z.string().optional().describe("New last name"),
+    role: z.enum(['admin', 'member']).optional().describe("New organization-level role")
+  },
+  async (params) => {
+    try {
+      const { user_id, ...updateData } = params;
+      const result = await portkeyService.updateUser(user_id, updateData);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error updating user: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "delete_user",
+  "Remove a user from your Portkey organization",
+  {
+    user_id: z.string().describe("User ID to delete")
+  },
+  async (params) => {
+    try {
+      await portkeyService.deleteUser(params.user_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify({ message: `User ${params.user_id} deleted successfully` }, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error deleting user: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
 // Start server
 const transport = new StdioServerTransport();
 await server.connect(transport);

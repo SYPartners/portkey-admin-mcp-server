@@ -3,8 +3,8 @@
 ## Overview
 
 **Goal:** Full Portkey Admin API coverage
-**Current:** 21 tools
-**Target:** 129 tools (+108 new)
+**Current:** 45 tools
+**Target:** 129 tools (+84 remaining)
 **Strategy:** One PR per phase for CodeRabbit review
 
 ---
@@ -14,7 +14,7 @@
 | Phase | Category | Tools | Status | PR |
 |-------|----------|-------|--------|-----|
 | 0 | Prompt Admin | 12 | ✅ Complete | [#1](https://github.com/SYPartners/portkey-admin-mcp-server/pull/1) |
-| 1 | Core Admin CRUD | 24 | Pending | - |
+| 1 | Core Admin CRUD | 24 | ✅ Complete | [#4](https://github.com/SYPartners/portkey-admin-mcp-server/pull/4) |
 | 2 | Governance & Security | 20 | Pending | - |
 | 3 | Prompt Enhancements | 14 | Pending | - |
 | 4 | Observability | 23 | Pending | - |
@@ -29,40 +29,40 @@
 **Priority:** P0 - Foundation
 
 ### 1.1 Config Management
-- [ ] `create_config` - POST `/configs`
-- [ ] `update_config` - PUT `/configs/{id}`
-- [ ] `delete_config` - DELETE `/configs/{id}`
-- [ ] `list_config_versions` - GET `/configs/{id}/versions`
+- [x] `create_config` - POST `/configs`
+- [x] `update_config` - PUT `/configs/{id}`
+- [x] `delete_config` - DELETE `/configs/{id}`
+- [x] `list_config_versions` - GET `/configs/{id}/versions`
 
 ### 1.2 API Keys
-- [ ] `create_api_key` - POST `/api-keys`
-- [ ] `list_api_keys` - GET `/api-keys`
-- [ ] `get_api_key` - GET `/api-keys/{id}`
-- [ ] `update_api_key` - PUT `/api-keys/{id}`
-- [ ] `delete_api_key` - DELETE `/api-keys/{id}`
+- [x] `create_api_key` - POST `/api-keys`
+- [x] `list_api_keys` - GET `/api-keys`
+- [x] `get_api_key` - GET `/api-keys/{id}`
+- [x] `update_api_key` - PUT `/api-keys/{id}`
+- [x] `delete_api_key` - DELETE `/api-keys/{id}`
 
 ### 1.3 Virtual Keys
-- [ ] `create_virtual_key` - POST `/virtual-keys`
-- [ ] `get_virtual_key` - GET `/virtual-keys/{id}`
-- [ ] `update_virtual_key` - PUT `/virtual-keys/{id}`
-- [ ] `delete_virtual_key` - DELETE `/virtual-keys/{id}`
+- [x] `create_virtual_key` - POST `/virtual-keys`
+- [x] `get_virtual_key` - GET `/virtual-keys/{id}`
+- [x] `update_virtual_key` - PUT `/virtual-keys/{id}`
+- [x] `delete_virtual_key` - DELETE `/virtual-keys/{id}`
 
 ### 1.4 Workspace Management
-- [ ] `create_workspace` - POST `/workspaces`
-- [ ] `update_workspace` - PUT `/workspaces/{id}`
-- [ ] `delete_workspace` - DELETE `/workspaces/{id}`
+- [x] `create_workspace` - POST `/workspaces`
+- [x] `update_workspace` - PUT `/workspaces/{id}`
+- [x] `delete_workspace` - DELETE `/workspaces/{id}`
 
 ### 1.5 Workspace Members
-- [ ] `add_workspace_member` - POST `/workspaces/{id}/members`
-- [ ] `list_workspace_members` - GET `/workspaces/{id}/members`
-- [ ] `get_workspace_member` - GET `/workspaces/{id}/members/{userId}`
-- [ ] `update_workspace_member` - PUT `/workspaces/{id}/members/{userId}`
-- [ ] `remove_workspace_member` - DELETE `/workspaces/{id}/members/{userId}`
+- [x] `add_workspace_member` - POST `/workspaces/{id}/members`
+- [x] `list_workspace_members` - GET `/workspaces/{id}/members`
+- [x] `get_workspace_member` - GET `/workspaces/{id}/members/{userId}`
+- [x] `update_workspace_member` - PUT `/workspaces/{id}/members/{userId}`
+- [x] `remove_workspace_member` - DELETE `/workspaces/{id}/members/{userId}`
 
 ### 1.6 User Management
-- [ ] `get_user` - GET `/users/{id}`
-- [ ] `update_user` - PUT `/users/{id}`
-- [ ] `delete_user` - DELETE `/users/{id}`
+- [x] `get_user` - GET `/users/{id}`
+- [x] `update_user` - PUT `/users/{id}`
+- [x] `delete_user` - DELETE `/users/{id}`
 
 ---
 
