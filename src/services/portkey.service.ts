@@ -538,6 +538,7 @@ interface PromotePromptRequest {
   target_collection_id: string;
   target_name?: string;
   target_env: string;
+  virtual_key?: string;
 }
 
 interface PromotePromptResponse {
@@ -1066,10 +1067,10 @@ export class PortkeyService {
           'Accept': 'application/json'
         },
         body: JSON.stringify({
+          ...data.hyperparameters,
           variables: data.variables,
           metadata: data.metadata,
-          stream: false, // Force non-streaming for MCP tool response
-          ...data.hyperparameters
+          stream: false // Force non-streaming for MCP tool response
         })
       });
 
@@ -1090,7 +1091,7 @@ export class PortkeyService {
   // ============================================
 
   async migratePrompt(data: MigratePromptRequest): Promise<MigratePromptResponse> {
-    const { dry_run = false, app, env, ...promptData } = data;
+    const { dry_run = false, app, env } = data;
 
     try {
       // Search for existing prompt by name in the collection
@@ -1257,13 +1258,19 @@ export class PortkeyService {
         };
       }
 
+      // Resolve virtual_key: caller override > source version
+      const virtualKey = data.virtual_key || sourceVersion.virtual_key;
+      if (!virtualKey) {
+        throw new Error('Cannot promote prompt: source version has no virtual_key and none was provided');
+      }
+
       // Create new target prompt
       const createResult = await this.createPrompt({
         name: targetName,
         collection_id: data.target_collection_id,
         string: sourceVersion.string,
         parameters: sourceVersion.parameters,
-        virtual_key: sourceVersion.virtual_key || '',
+        virtual_key: virtualKey,
         model: sourceVersion.model,
         functions: sourceVersion.functions,
         tools: sourceVersion.tools,

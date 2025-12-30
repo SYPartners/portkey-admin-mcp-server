@@ -526,8 +526,8 @@ const HyperparametersSchema = z.object({
 
 const BillingMetadataSchema = z.object({
   client_id: z.string().describe("Client ID for billing attribution (REQUIRED)"),
-  app: z.string().describe("App identifier: hourlink, apizone, research-pilot (REQUIRED)"),
-  env: z.string().describe("Environment: dev, staging, prod (REQUIRED)"),
+  app: z.enum(['hourlink', 'apizone', 'research-pilot']).describe("App identifier (REQUIRED)"),
+  env: z.enum(['dev', 'staging', 'prod']).describe("Environment (REQUIRED)"),
   project_id: z.string().optional().describe("Project ID for granular billing"),
   feature: z.string().optional().describe("Feature name for tracking")
 });
@@ -871,8 +871,8 @@ server.tool(
   "Create or update a prompt based on whether it exists. Useful for CI/CD and prompt-as-code workflows. Finds existing prompts by name within the collection.",
   {
     name: z.string().describe("Prompt name to create or find for update"),
-    app: z.string().describe("App identifier: hourlink, apizone, research-pilot"),
-    env: z.string().describe("Environment: dev, staging, prod"),
+    app: z.enum(['hourlink', 'apizone', 'research-pilot']).describe("App identifier"),
+    env: z.enum(['dev', 'staging', 'prod']).describe("Environment"),
     collection_id: z.string().describe("Collection ID to search in and create under"),
     string: z.array(PromptMessageSchema).describe("Message templates with {{variable}} placeholders"),
     parameters: z.array(PromptParameterSchema).describe("Parameter definitions"),
@@ -939,7 +939,8 @@ server.tool(
     source_prompt_id: z.string().describe("Source prompt ID or slug (e.g., staging prompt)"),
     target_collection_id: z.string().describe("Target collection ID for the promoted prompt"),
     target_name: z.string().optional().describe("Target prompt name (defaults to source name with env suffix replaced)"),
-    target_env: z.string().describe("Target environment: dev, staging, prod")
+    target_env: z.enum(['dev', 'staging', 'prod']).describe("Target environment"),
+    virtual_key: z.string().optional().describe("Virtual key ID to use (defaults to source prompt's virtual_key)")
   },
   async (params) => {
     try {
@@ -947,7 +948,8 @@ server.tool(
         source_prompt_id: params.source_prompt_id,
         target_collection_id: params.target_collection_id,
         target_name: params.target_name,
-        target_env: params.target_env
+        target_env: params.target_env,
+        virtual_key: params.virtual_key
       });
 
       return {
