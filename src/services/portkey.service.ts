@@ -1049,12 +1049,13 @@ export class PortkeyService {
 
   async runPromptCompletion(promptId: string, data: PromptCompletionRequest): Promise<PromptCompletionResponse> {
     try {
-      // Validate required billing metadata
-      if (data.metadata) {
-        const validationResult = this.validateBillingMetadata(data.metadata);
-        if (!validationResult.valid) {
-          throw new Error(`Billing metadata validation failed: ${validationResult.errors.join(', ')}`);
-        }
+      // Validate required billing metadata - always required for cost attribution
+      if (!data.metadata) {
+        throw new Error('Billing metadata is required for prompt completions');
+      }
+      const validationResult = this.validateBillingMetadata(data.metadata);
+      if (!validationResult.valid) {
+        throw new Error(`Billing metadata validation failed: ${validationResult.errors.join(', ')}`);
       }
 
       const response = await fetch(`${this.baseUrl}/prompts/${promptId}/completions`, {
@@ -1214,7 +1215,7 @@ export class PortkeyService {
       const sourceVersion = sourcePrompt.current_version;
 
       // Determine target name (append env suffix if not provided)
-      const targetName = data.target_name || sourcePrompt.name.replace(/-staging$|-dev$/, '') + `-${data.target_env}`;
+      const targetName = data.target_name || sourcePrompt.name.replace(/-(dev|staging|prod)$/, '') + `-${data.target_env}`;
 
       // Search for existing target prompt in target collection
       const existingTargets = await this.listPrompts({
