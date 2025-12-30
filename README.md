@@ -1,198 +1,86 @@
-[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/r-huijts-portkey-admin-mcp-server-badge.png)](https://mseep.ai/app/r-huijts-portkey-admin-mcp-server)
+# Portkey Admin MCP Server
 
-# Portkey MCP Server
-[![smithery badge](https://smithery.ai/badge/@r-huijts/portkey-admin-mcp-server)](https://smithery.ai/server/@r-huijts/portkey-admin-mcp-server)
+MCP server for the Portkey Admin API. Manage prompts, configs, workspaces, API keys, and more through Claude.
 
-Transform your AI assistant into a Portkey platform expert! This MCP server connects Claude to Portkey's API, enabling comprehensive management of AI configurations, workspaces, analytics, and user access.
-
-<a href="https://glama.ai/mcp/servers/iftjfqrk0v"><img width="380" height="200" src="https://glama.ai/mcp/servers/iftjfqrk0v/badge" alt="Portkey Server MCP server" /></a>
+> Based on [r-huijts/portkey-admin-mcp-server](https://github.com/r-huijts/portkey-admin-mcp-server). This fork expands API coverage toward full Portkey Admin API support.
 
 ## Installation
 
-### From Source
-1. Clone this repository
-2. Install dependencies:
+1. Clone and install:
 ```bash
+git clone https://github.com/SYPartners/portkey-admin-mcp-server.git
+cd portkey-admin-mcp-server
 npm install
+npm run build
 ```
-3. Copy the example environment file:
-```bash
-cp .env.example .env
-```
-4. Add your Portkey API key to the `.env` file:
-```bash
-PORTKEY_API_KEY=your_portkey_api_key_here
-```
-5. Then update your Claude configuration file:
 
+2. Add to your Claude config (`~/.claude/claude_desktop_config.json`):
 ```json
 {
   "mcpServers": {
-    "portkey-server": {
+    "portkey": {
       "command": "node",
-      "args": [
-        "/path/to/portkey-server/build/index.js"
-      ],
+      "args": ["/path/to/portkey-admin-mcp-server/build/index.js"],
       "env": {
-        "PORTKEY_API_KEY": "your_portkey_api_key_here"
+        "PORTKEY_API_KEY": "your_api_key"
       }
     }
   }
 }
 ```
 
-Make sure to:
-- Replace `/path/to/portkey-server` with the actual path to your installation
-- Add your Portkey API key in the `env` section
+3. Restart Claude Desktop.
 
-After updating the configuration, restart Claude Desktop for the changes to take effect.
+## Current Tools (21)
 
-### Installing via Smithery
-
-To install Portkey MCP Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@r-huijts/portkey-admin-mcp-server):
-
-```bash
-npx -y @smithery/cli install @r-huijts/portkey-admin-mcp-server --client claude
-```
-
-## Real-World Use Cases
-- "What are my current API usage statistics across different models?"
-- "Show me the performance metrics for my AI deployments"
-- "Create a new workspace for my team's project"
-- "What's my current API key usage and remaining credits?"
-- "Generate an analytics report for last month's API calls"
-- "Set up rate limiting for my development environment"
-- "Configure fallback behavior for my production endpoints"
-- "Add team members to my Portkey workspace"
-- "Show me the latency statistics for my API calls"
-- "Set up custom headers for my API requests"
-
-## 🔑 Environment Variables
-
-| Variable | Description |
-|----------|-------------|
-| PORTKEY_API_KEY | Your Portkey API key (required) |
-
-## 🌟 Features
-
-This MCP server provides comprehensive access to Portkey's platform through the following capabilities:
-
-### User & Access Management
-- **User Administration**: List and manage all users in your Portkey organization
-- **User Invitations**: Invite new users with customizable roles and permissions
-- **Workspace Access**: Configure user access levels across different workspaces
-- **Role-Based Control**: Assign admin, manager, or member roles at organization and workspace levels
-
-### Analytics & Reporting
-- **Usage Analytics**: Track detailed user activity and request patterns
-- **Cost Analysis**: Monitor and analyze costs across different time periods
-- **Request Metrics**: View request counts, token usage, and response times
-- **Filtered Reports**: Generate reports based on custom criteria like status codes, virtual keys, and time ranges
-
-### Workspace Management
-- **Workspace Overview**: List and view detailed information about all workspaces
-- **Configuration Management**: Access and review workspace configurations
-- **Virtual Key Management**: Monitor and manage API keys with usage limits and rate limits
-- **Workspace Settings**: View and track workspace metadata and user associations
-
-### Configuration & API Settings
-- **Config Listings**: View all available configurations in your organization
-- **Detailed Config Info**: Access cache settings, retry policies, and routing strategies
-- **Virtual Key Details**: Monitor key status, usage limits, and rate limits
-- **API Integration**: Track API endpoints and their configurations
-
-### Prompt Admin (New!)
-- **Collection Management**: Organize prompts by app using collections
-- **Prompt CRUD**: Create, list, get, and update prompt templates
-- **Version Control**: Automatic versioning on prompt updates
-- **Template Rendering**: Preview rendered prompts with variables
-- **Prompt Completions**: Execute prompts with billing metadata tracking
-- **Migration Helper**: Create-or-update prompts with app/env support
-- **Environment Promotion**: Promote prompts from staging to production
-- **Billing Validation**: Enforce required metadata for cost attribution
-
-## Prompt Admin Tools
-
-This fork adds 12 new tools for managing Portkey prompts with app grouping, environment promotion, and billing metadata validation.
-
-### Collection Tools (App Grouping)
-
+### User & Access
 | Tool | Description |
 |------|-------------|
-| `list_collections` | List all collections with optional workspace filtering |
-| `create_collection` | Create a new collection to group prompts by app |
-| `get_collection` | Get collection details by ID |
+| `list_all_users` | List all users in organization |
+| `invite_user` | Invite a new user |
+| `get_user_stats` | Get user statistics |
 
-### Prompt CRUD Tools
-
+### Workspaces & Config
 | Tool | Description |
 |------|-------------|
-| `create_prompt` | Create a new prompt template with messages and parameters |
-| `list_prompts` | List prompts with optional collection/workspace filtering |
-| `get_prompt` | Get prompt details including version history |
-| `update_prompt` | Update prompt (creates new version automatically) |
-| `render_prompt` | Preview rendered template with variables (no model call) |
-| `run_prompt_completion` | Execute prompt and get completion with billing metadata |
+| `list_workspaces` | List all workspaces |
+| `get_workspace` | Get workspace details |
+| `list_configs` | List gateway configs |
+| `get_config` | Get config details |
+| `list_virtual_keys` | List virtual keys |
 
-### Migration & Promotion Tools
-
+### Analytics
 | Tool | Description |
 |------|-------------|
-| `migrate_prompt` | Create-or-update helper with app/env support and dry_run mode |
-| `promote_prompt` | Copy prompt version from staging to production |
-| `validate_completion_metadata` | Validate billing metadata before completion |
+| `get_cost_analytics` | Get cost analytics data |
 
-### Billing Metadata Schema
+### Prompt Management
+| Tool | Description |
+|------|-------------|
+| `list_collections` | List prompt collections |
+| `create_collection` | Create a collection |
+| `get_collection` | Get collection details |
+| `create_prompt` | Create a prompt template |
+| `list_prompts` | List prompts |
+| `get_prompt` | Get prompt details |
+| `update_prompt` | Update a prompt |
+| `render_prompt` | Render prompt with variables |
+| `run_prompt_completion` | Execute prompt completion |
+| `migrate_prompt` | Create-or-update prompt |
+| `promote_prompt` | Promote prompt between environments |
+| `validate_completion_metadata` | Validate billing metadata |
 
-When running prompt completions, the following metadata is required for cost attribution:
+## Roadmap
 
-| Field | Required | Description | Example |
-|-------|----------|-------------|---------|
-| `client_id` | Yes | Client identifier for billing | `"acme-corp"` |
-| `app` | Yes | Application name | `"hourlink"` |
-| `env` | Yes | Environment | `"prod"` |
-| `project_id` | No | Project identifier | `"proj-123"` |
-| `feature` | No | Feature name | `"event-classification"` |
+Expanding to full Portkey Admin API coverage (~129 tools):
 
-### Example Usage
-
-**Create a collection for an app:**
-```bash
-# Using Claude Code MCP
-"Create a collection called 'hourlink' for our hourlink app prompts"
-```
-
-**Create a prompt with parameters:**
-```bash
-# Using Claude Code MCP
-"Create a prompt called 'event-classifier' in the hourlink collection with:
-- System message: 'You are an event classifier'
-- User message template: 'Classify this event: {{event_description}}'
-- Parameter: event_description (string, required)"
-```
-
-**Migrate a prompt with environment tagging:**
-```bash
-# Using Claude Code MCP
-"Migrate the event-classifier prompt to staging environment in the hourlink app"
-```
-
-**Promote from staging to production:**
-```bash
-# Using Claude Code MCP
-"Promote the event-classifier prompt from staging to production"
-```
-
-**Run a completion with billing metadata:**
-```bash
-# Using Claude Code MCP
-"Run the event-classifier prompt with:
-- event_description: 'Team meeting scheduled for Monday'
-- client_id: 'acme-corp'
-- app: 'hourlink'
-- env: 'prod'"
-```
+- **Phase 1**: Core Admin CRUD (configs, API keys, virtual keys, workspaces, users)
+- **Phase 2**: Governance & Security (guardrails, rate limits, usage limits, audit logs)
+- **Phase 3**: Prompt Enhancements (partials, labels, versions)
+- **Phase 4**: Observability (analytics, logs, traces, feedback)
+- **Phase 5**: Providers & Integrations
+- **Phase 6**: Gateway APIs (embeddings, images, audio, files)
 
 ## License
 
-This project is licensed under the ISC License - see the LICENSE file for details
+ISC License
