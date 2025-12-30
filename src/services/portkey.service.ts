@@ -337,9 +337,10 @@ interface PromptTemplateMetadata {
 interface CreatePromptRequest {
   name: string;
   collection_id: string;
-  /** Portkey API field name - contains message array, not a string */
-  string: PromptMessage[];
-  parameters: PromptParameter[];
+  /** Prompt template string with {{variable}} mustache syntax */
+  string: string;
+  /** Default values for template variables */
+  parameters: Record<string, unknown>;
   virtual_key: string;
   functions?: PromptFunctionDefinition[];
   tools?: PromptToolDefinition[];
@@ -389,9 +390,10 @@ interface PromptVersion {
   id: string;
   version_number: number;
   version_description?: string;
-  /** Portkey API field name - contains message array, not a string */
-  string: PromptMessage[];
-  parameters: PromptParameter[];
+  /** Prompt template string with {{variable}} mustache syntax */
+  string: string;
+  /** Default values for template variables */
+  parameters: Record<string, unknown>;
   model?: string;
   virtual_key?: string;
   functions?: PromptFunctionDefinition[];
@@ -418,9 +420,10 @@ interface GetPromptResponse {
 interface UpdatePromptRequest {
   name?: string;
   collection_id?: string;
-  /** Portkey API field name - contains message array, not a string */
-  string?: PromptMessage[];
-  parameters?: PromptParameter[];
+  /** Prompt template string with {{variable}} mustache syntax */
+  string?: string;
+  /** Default values for template variables */
+  parameters?: Record<string, unknown>;
   model?: string;
   virtual_key?: string;
   functions?: PromptFunctionDefinition[];
@@ -514,9 +517,10 @@ interface MigratePromptRequest {
   app: string;
   env: string;
   collection_id: string;
-  /** Portkey API field name - contains message array, not a string */
-  string: PromptMessage[];
-  parameters: PromptParameter[];
+  /** Prompt template string with {{variable}} mustache syntax */
+  string: string;
+  /** Default values for template variables */
+  parameters: Record<string, unknown>;
   virtual_key: string;
   model?: string;
   version_description?: string;
@@ -853,7 +857,7 @@ export class PortkeyService {
       if (params?.page_size) queryParams.append('page_size', params.page_size.toString());
       if (params?.search) queryParams.append('search', params.search);
 
-      const url = `${this.baseUrl}/prompts/collections${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+      const url = `${this.baseUrl}/collections${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
 
       const response = await fetch(url, {
         method: 'GET',
@@ -876,7 +880,7 @@ export class PortkeyService {
 
   async createCollection(data: CreateCollectionRequest): Promise<CreateCollectionResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/prompts/collections`, {
+      const response = await fetch(`${this.baseUrl}/collections`, {
         method: 'POST',
         headers: {
           'x-portkey-api-key': this.apiKey,
@@ -900,7 +904,7 @@ export class PortkeyService {
 
   async getCollection(collectionId: string): Promise<Collection> {
     try {
-      const response = await fetch(`${this.baseUrl}/prompts/collections/${collectionId}`, {
+      const response = await fetch(`${this.baseUrl}/collections/${collectionId}`, {
         method: 'GET',
         headers: {
           'x-portkey-api-key': this.apiKey,

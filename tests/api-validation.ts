@@ -2,7 +2,9 @@
  * API Validation Tests
  *
  * Tests the Portkey Admin API endpoints to validate our implementation.
- * Specifically validates that the `string` field accepts PromptMessage[] arrays.
+ * Specifically validates that:
+ *   - `string` field is a plain template string with {{variable}} mustache syntax
+ *   - `parameters` field is a Record<string, unknown> of default values
  *
  * Run: npx tsx tests/api-validation.ts
  */
@@ -126,21 +128,19 @@ async function main() {
   }
 
   // ============================================================
-  // Test 5: Create Prompt (THE KEY TEST - validates string: PromptMessage[])
+  // Test 5: Create Prompt (validates string: string format)
   // ============================================================
-  await test('Create Prompt (validates string: PromptMessage[])', async () => {
+  await test('Create Prompt (validates string field is plain string)', async () => {
     const response = await portkey.createPrompt({
       name: `MCP Test Prompt ${Date.now()}`,
       collection_id: collectionId!,
-      // THIS IS THE KEY TEST: string field takes an array of messages
-      string: [
-        { role: 'system', content: 'You are a helpful assistant. The user name is {{name}}.' },
-        { role: 'user', content: '{{question}}' }
-      ],
-      parameters: [
-        { name: 'name', type: 'string', required: true },
-        { name: 'question', type: 'string', required: true }
-      ],
+      // The string field is a template string with {{variable}} mustache syntax
+      string: 'You are a helpful assistant. The user name is {{name}}.\n\nQuestion: {{question}}',
+      // Parameters are default values for template variables
+      parameters: {
+        name: 'User',
+        question: 'What is 2+2?'
+      },
       virtual_key: virtualKeyId!,
       model: 'gpt-4o-mini'
     });
@@ -218,7 +218,7 @@ function printSummary() {
   console.log(`\nTotal: ${passed} passed, ${failed} failed`);
 
   if (failed === 0) {
-    console.log('\n\x1b[32mAll tests passed! The string: PromptMessage[] implementation is CORRECT.\x1b[0m');
+    console.log('\n\x1b[32mAll tests passed! The API schema implementation is CORRECT.\x1b[0m');
   } else {
     console.log('\n\x1b[31mSome tests failed. Check the output above for details.\x1b[0m');
   }
