@@ -1,10 +1,12 @@
 # Portkey Admin MCP Server - API Coverage Roadmap
 
+> **Note:** This roadmap tracks development in the [SYPartners/portkey-admin-mcp-server](https://github.com/SYPartners/portkey-admin-mcp-server) fork only.
+
 ## Overview
 
 **Goal:** Full Portkey Admin API coverage
-**Current:** 45 tools
-**Target:** 129 tools (+84 remaining)
+**Current:** 65 tools
+**Target:** 129 tools (+64 remaining)
 **Strategy:** One PR per phase for CodeRabbit review
 
 ---
@@ -14,8 +16,8 @@
 | Phase | Category | Tools | Status | PR |
 |-------|----------|-------|--------|-----|
 | 0 | Prompt Admin | 12 | ✅ Complete | [#1](https://github.com/SYPartners/portkey-admin-mcp-server/pull/1) |
-| 1 | Core Admin CRUD | 24 | ✅ Complete | [#4](https://github.com/SYPartners/portkey-admin-mcp-server/pull/4) |
-| 2 | Governance & Security | 20 | Pending | - |
+| 1 | Core Admin CRUD | 24 | ✅ Complete | - |
+| 2 | Governance & Security | 20 | ✅ Complete | - |
 | 3 | Prompt Enhancements | 14 | Pending | - |
 | 4 | Observability | 23 | Pending | - |
 | 5 | Providers & Integrations | 15 | Pending | - |
@@ -72,34 +74,34 @@
 **Priority:** P1 - Security controls
 
 ### 2.1 User Invites
-- [ ] `list_user_invites` - GET `/user-invites`
-- [ ] `get_user_invite` - GET `/user-invites/{id}`
-- [ ] `delete_user_invite` - DELETE `/user-invites/{id}`
-- [ ] `resend_user_invite` - POST `/user-invites/{id}/resend`
+- [x] `list_user_invites` - GET `/user-invites`
+- [x] `get_user_invite` - GET `/user-invites/{id}`
+- [x] `delete_user_invite` - DELETE `/user-invites/{id}`
+- [x] `resend_user_invite` - POST `/user-invites/{id}/resend`
 
 ### 2.2 Guardrails
-- [ ] `create_guardrail` - POST `/guardrails`
-- [ ] `list_guardrails` - GET `/guardrails`
-- [ ] `get_guardrail` - GET `/guardrails/{id}`
-- [ ] `update_guardrail` - PUT `/guardrails/{id}`
-- [ ] `delete_guardrail` - DELETE `/guardrails/{id}`
+- [x] `create_guardrail` - POST `/guardrails`
+- [x] `list_guardrails` - GET `/guardrails`
+- [x] `get_guardrail` - GET `/guardrails/{id}`
+- [x] `update_guardrail` - PUT `/guardrails/{id}`
+- [x] `delete_guardrail` - DELETE `/guardrails/{id}`
 
 ### 2.3 Usage Limit Policies
-- [ ] `create_usage_limit_policy` - POST `/policies/usage-limits`
-- [ ] `list_usage_limit_policies` - GET `/policies/usage-limits`
-- [ ] `get_usage_limit_policy` - GET `/policies/usage-limits/{id}`
-- [ ] `update_usage_limit_policy` - PUT `/policies/usage-limits/{id}`
-- [ ] `delete_usage_limit_policy` - DELETE `/policies/usage-limits/{id}`
+- [x] `create_usage_limit_policy` - POST `/policies/usage-limits`
+- [x] `list_usage_limit_policies` - GET `/policies/usage-limits`
+- [x] `get_usage_limit_policy` - GET `/policies/usage-limits/{id}`
+- [x] `update_usage_limit_policy` - PUT `/policies/usage-limits/{id}`
+- [x] `delete_usage_limit_policy` - DELETE `/policies/usage-limits/{id}`
 
 ### 2.4 Rate Limit Policies
-- [ ] `create_rate_limit_policy` - POST `/policies/rate-limits`
-- [ ] `list_rate_limit_policies` - GET `/policies/rate-limits`
-- [ ] `get_rate_limit_policy` - GET `/policies/rate-limits/{id}`
-- [ ] `update_rate_limit_policy` - PUT `/policies/rate-limits/{id}`
-- [ ] `delete_rate_limit_policy` - DELETE `/policies/rate-limits/{id}`
+- [x] `create_rate_limit_policy` - POST `/policies/rate-limits`
+- [x] `list_rate_limit_policies` - GET `/policies/rate-limits`
+- [x] `get_rate_limit_policy` - GET `/policies/rate-limits/{id}`
+- [x] `update_rate_limit_policy` - PUT `/policies/rate-limits/{id}`
+- [x] `delete_rate_limit_policy` - DELETE `/policies/rate-limits/{id}`
 
 ### 2.5 Audit Logs
-- [ ] `list_audit_logs` - GET `/audit-logs`
+- [x] `list_audit_logs` - GET `/audit-logs`
 
 ---
 

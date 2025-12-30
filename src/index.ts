@@ -1633,6 +1633,502 @@ server.tool(
   }
 );
 
+// ============================================
+// Phase 2: User Invite Tools
+// ============================================
+
+server.tool(
+  "list_user_invites",
+  "List all user invitations in your Portkey organization with optional filtering by status",
+  {
+    page_size: z.number().positive().optional().describe("Number of results per page"),
+    current_page: z.number().positive().optional().describe("Page number for pagination"),
+    status: z.enum(['pending', 'accepted', 'expired']).optional().describe("Filter by invite status")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.listUserInvites(params);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error listing user invites: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "get_user_invite",
+  "Get details of a specific user invitation",
+  {
+    invite_id: z.string().describe("The ID of the user invite to retrieve")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.getUserInvite(params.invite_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error getting user invite: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "delete_user_invite",
+  "Delete a pending user invitation",
+  {
+    invite_id: z.string().describe("The ID of the user invite to delete")
+  },
+  async (params) => {
+    try {
+      await portkeyService.deleteUserInvite(params.invite_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify({ message: `User invite ${params.invite_id} deleted successfully` }, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error deleting user invite: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "resend_user_invite",
+  "Resend a user invitation email",
+  {
+    invite_id: z.string().describe("The ID of the user invite to resend")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.resendUserInvite(params.invite_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify({ message: `User invite resent successfully`, invite: result }, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error resending user invite: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+// ============================================
+// Phase 2: Guardrail Tools
+// ============================================
+
+const GuardrailCheckSchema = z.object({
+  id: z.string().describe("Unique identifier for the check"),
+  type: z.string().describe("Type of guardrail check (e.g., 'pii', 'toxicity', 'prompt_injection')"),
+  enabled: z.boolean().describe("Whether this check is enabled"),
+  config: z.record(z.unknown()).optional().describe("Configuration options for this check")
+});
+
+server.tool(
+  "create_guardrail",
+  "Create a new guardrail for content safety and policy enforcement",
+  {
+    name: z.string().describe("Name for the guardrail"),
+    description: z.string().optional().describe("Description of what this guardrail does"),
+    checks: z.array(GuardrailCheckSchema).describe("Array of checks to include in this guardrail"),
+    actions: z.object({
+      on_fail: z.enum(['block', 'log', 'warn']).optional().describe("Action to take when checks fail"),
+      on_pass: z.enum(['allow', 'log']).optional().describe("Action to take when checks pass")
+    }).optional().describe("Actions to take based on check results"),
+    workspace_id: z.string().optional().describe("Workspace ID to create the guardrail in")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.createGuardrail(params);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error creating guardrail: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "list_guardrails",
+  "List all guardrails in your Portkey organization",
+  {
+    page_size: z.number().positive().optional().describe("Number of results per page"),
+    current_page: z.number().positive().optional().describe("Page number for pagination"),
+    workspace_id: z.string().optional().describe("Filter by workspace ID")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.listGuardrails(params);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error listing guardrails: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "get_guardrail",
+  "Get details of a specific guardrail",
+  {
+    guardrail_id: z.string().describe("The ID or slug of the guardrail to retrieve")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.getGuardrail(params.guardrail_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error getting guardrail: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "update_guardrail",
+  "Update an existing guardrail",
+  {
+    guardrail_id: z.string().describe("The ID or slug of the guardrail to update"),
+    name: z.string().optional().describe("New name for the guardrail"),
+    description: z.string().optional().describe("Updated description"),
+    checks: z.array(GuardrailCheckSchema).optional().describe("Updated array of checks"),
+    actions: z.object({
+      on_fail: z.enum(['block', 'log', 'warn']).optional().describe("Action to take when checks fail"),
+      on_pass: z.enum(['allow', 'log']).optional().describe("Action to take when checks pass")
+    }).optional().describe("Updated actions"),
+    status: z.enum(['active', 'inactive']).optional().describe("Guardrail status")
+  },
+  async (params) => {
+    try {
+      const { guardrail_id, ...updateData } = params;
+      const result = await portkeyService.updateGuardrail(guardrail_id, updateData);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error updating guardrail: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "delete_guardrail",
+  "Delete a guardrail",
+  {
+    guardrail_id: z.string().describe("The ID or slug of the guardrail to delete")
+  },
+  async (params) => {
+    try {
+      await portkeyService.deleteGuardrail(params.guardrail_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify({ message: `Guardrail ${params.guardrail_id} deleted successfully` }, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error deleting guardrail: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+// ============================================
+// Phase 2: Usage Limit Policy Tools
+// ============================================
+
+const AppliesToSchema = z.object({
+  workspace_ids: z.array(z.string()).optional().describe("Workspace IDs this policy applies to"),
+  api_key_ids: z.array(z.string()).optional().describe("API key IDs this policy applies to"),
+  virtual_key_ids: z.array(z.string()).optional().describe("Virtual key IDs this policy applies to"),
+  user_ids: z.array(z.string()).optional().describe("User IDs this policy applies to")
+});
+
+server.tool(
+  "create_usage_limit_policy",
+  "Create a new usage limit policy to control resource consumption",
+  {
+    name: z.string().describe("Name for the usage limit policy"),
+    description: z.string().optional().describe("Description of the policy"),
+    type: z.enum(['cost', 'tokens', 'requests']).describe("Type of limit: 'cost' for dollar limits, 'tokens' for token limits, 'requests' for request count limits"),
+    limit_value: z.number().positive().describe("The limit value (e.g., 1000 for 1000 tokens or $10 for cost)"),
+    period: z.enum(['hourly', 'daily', 'weekly', 'monthly']).describe("Time period for the limit"),
+    alert_threshold: z.number().min(0).max(100).optional().describe("Percentage threshold to trigger alerts (0-100)"),
+    action_on_limit: z.enum(['block', 'warn', 'log']).optional().describe("Action to take when limit is reached"),
+    applies_to: AppliesToSchema.optional().describe("Resources this policy applies to")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.createUsageLimitPolicy(params);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error creating usage limit policy: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "list_usage_limit_policies",
+  "List all usage limit policies in your Portkey organization",
+  {
+    page_size: z.number().positive().optional().describe("Number of results per page"),
+    current_page: z.number().positive().optional().describe("Page number for pagination")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.listUsageLimitPolicies(params);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error listing usage limit policies: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "get_usage_limit_policy",
+  "Get details of a specific usage limit policy",
+  {
+    policy_id: z.string().describe("The ID of the usage limit policy to retrieve")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.getUsageLimitPolicy(params.policy_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error getting usage limit policy: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "update_usage_limit_policy",
+  "Update an existing usage limit policy",
+  {
+    policy_id: z.string().describe("The ID of the usage limit policy to update"),
+    name: z.string().optional().describe("New name for the policy"),
+    description: z.string().optional().describe("Updated description"),
+    type: z.enum(['cost', 'tokens', 'requests']).optional().describe("Updated limit type"),
+    limit_value: z.number().positive().optional().describe("Updated limit value"),
+    period: z.enum(['hourly', 'daily', 'weekly', 'monthly']).optional().describe("Updated time period"),
+    alert_threshold: z.number().min(0).max(100).optional().describe("Updated alert threshold"),
+    action_on_limit: z.enum(['block', 'warn', 'log']).optional().describe("Updated action on limit"),
+    applies_to: AppliesToSchema.optional().describe("Updated resource scope"),
+    status: z.enum(['active', 'inactive']).optional().describe("Policy status")
+  },
+  async (params) => {
+    try {
+      const { policy_id, ...updateData } = params;
+      const result = await portkeyService.updateUsageLimitPolicy(policy_id, updateData);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error updating usage limit policy: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "delete_usage_limit_policy",
+  "Delete a usage limit policy",
+  {
+    policy_id: z.string().describe("The ID of the usage limit policy to delete")
+  },
+  async (params) => {
+    try {
+      await portkeyService.deleteUsageLimitPolicy(params.policy_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify({ message: `Usage limit policy ${params.policy_id} deleted successfully` }, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error deleting usage limit policy: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+// ============================================
+// Phase 2: Rate Limit Policy Tools
+// ============================================
+
+server.tool(
+  "create_rate_limit_policy",
+  "Create a new rate limit policy to control request throughput",
+  {
+    name: z.string().describe("Name for the rate limit policy"),
+    description: z.string().optional().describe("Description of the policy"),
+    type: z.enum(['requests', 'tokens']).describe("Type of rate limit: 'requests' for request count, 'tokens' for token throughput"),
+    limit_value: z.number().positive().describe("The rate limit value (e.g., 100 requests per window)"),
+    window: z.enum(['second', 'minute', 'hour']).describe("Time window for the rate limit"),
+    action_on_limit: z.enum(['block', 'queue', 'throttle']).optional().describe("Action to take when limit is reached"),
+    applies_to: AppliesToSchema.optional().describe("Resources this policy applies to")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.createRateLimitPolicy(params);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error creating rate limit policy: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "list_rate_limit_policies",
+  "List all rate limit policies in your Portkey organization",
+  {
+    page_size: z.number().positive().optional().describe("Number of results per page"),
+    current_page: z.number().positive().optional().describe("Page number for pagination")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.listRateLimitPolicies(params);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error listing rate limit policies: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "get_rate_limit_policy",
+  "Get details of a specific rate limit policy",
+  {
+    policy_id: z.string().describe("The ID of the rate limit policy to retrieve")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.getRateLimitPolicy(params.policy_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error getting rate limit policy: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "update_rate_limit_policy",
+  "Update an existing rate limit policy",
+  {
+    policy_id: z.string().describe("The ID of the rate limit policy to update"),
+    name: z.string().optional().describe("New name for the policy"),
+    description: z.string().optional().describe("Updated description"),
+    type: z.enum(['requests', 'tokens']).optional().describe("Updated rate limit type"),
+    limit_value: z.number().positive().optional().describe("Updated limit value"),
+    window: z.enum(['second', 'minute', 'hour']).optional().describe("Updated time window"),
+    action_on_limit: z.enum(['block', 'queue', 'throttle']).optional().describe("Updated action on limit"),
+    applies_to: AppliesToSchema.optional().describe("Updated resource scope"),
+    status: z.enum(['active', 'inactive']).optional().describe("Policy status")
+  },
+  async (params) => {
+    try {
+      const { policy_id, ...updateData } = params;
+      const result = await portkeyService.updateRateLimitPolicy(policy_id, updateData);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error updating rate limit policy: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+server.tool(
+  "delete_rate_limit_policy",
+  "Delete a rate limit policy",
+  {
+    policy_id: z.string().describe("The ID of the rate limit policy to delete")
+  },
+  async (params) => {
+    try {
+      await portkeyService.deleteRateLimitPolicy(params.policy_id);
+      return {
+        content: [{ type: "text", text: JSON.stringify({ message: `Rate limit policy ${params.policy_id} deleted successfully` }, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error deleting rate limit policy: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
+// ============================================
+// Phase 2: Audit Log Tools
+// ============================================
+
+server.tool(
+  "list_audit_logs",
+  "List audit logs for your Portkey organization with filtering options",
+  {
+    page_size: z.number().positive().optional().describe("Number of results per page"),
+    current_page: z.number().positive().optional().describe("Page number for pagination"),
+    action: z.string().optional().describe("Filter by action type (e.g., 'create', 'update', 'delete')"),
+    resource_type: z.string().optional().describe("Filter by resource type (e.g., 'config', 'api_key', 'virtual_key')"),
+    resource_id: z.string().optional().describe("Filter by specific resource ID"),
+    actor_id: z.string().optional().describe("Filter by the ID of the user or API key that performed the action"),
+    workspace_id: z.string().optional().describe("Filter by workspace ID"),
+    start_time: z.string().optional().describe("Filter logs from this time (ISO8601 format)"),
+    end_time: z.string().optional().describe("Filter logs until this time (ISO8601 format)")
+  },
+  async (params) => {
+    try {
+      const result = await portkeyService.listAuditLogs(params);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error listing audit logs: ${error instanceof Error ? error.message : 'Unknown error'}` }]
+      };
+    }
+  }
+);
+
 // Start server
 const transport = new StdioServerTransport();
 await server.connect(transport);

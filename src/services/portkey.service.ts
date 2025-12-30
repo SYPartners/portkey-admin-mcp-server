@@ -789,6 +789,271 @@ interface ValidateMetadataResult {
   warnings: string[];
 }
 
+// ============================================
+// Phase 2: Governance & Security Interfaces
+// ============================================
+
+// User Invites
+interface UserInvite {
+  id: string;
+  email: string;
+  role: 'admin' | 'member';
+  first_name?: string;
+  last_name?: string;
+  status: 'pending' | 'accepted' | 'expired';
+  invite_link?: string;
+  workspaces?: Array<{
+    id: string;
+    role: 'admin' | 'member' | 'manager';
+  }>;
+  created_at: string;
+  expires_at?: string;
+  last_updated_at?: string;
+  object: 'user-invite';
+}
+
+interface ListUserInvitesParams {
+  page_size?: number;
+  current_page?: number;
+  status?: 'pending' | 'accepted' | 'expired';
+}
+
+interface ListUserInvitesResponse {
+  data: UserInvite[];
+  total: number;
+  object: 'list';
+}
+
+// Guardrails
+interface GuardrailCheck {
+  id: string;
+  type: string;
+  enabled: boolean;
+  config?: Record<string, unknown>;
+}
+
+interface Guardrail {
+  id: string;
+  name: string;
+  slug?: string;
+  description?: string;
+  checks: GuardrailCheck[];
+  actions?: {
+    on_fail?: 'block' | 'log' | 'warn';
+    on_pass?: 'allow' | 'log';
+  };
+  workspace_id?: string;
+  status?: 'active' | 'inactive';
+  created_at: string;
+  last_updated_at: string;
+  object: 'guardrail';
+}
+
+interface CreateGuardrailRequest {
+  name: string;
+  description?: string;
+  checks: GuardrailCheck[];
+  actions?: {
+    on_fail?: 'block' | 'log' | 'warn';
+    on_pass?: 'allow' | 'log';
+  };
+  workspace_id?: string;
+}
+
+interface UpdateGuardrailRequest {
+  name?: string;
+  description?: string;
+  checks?: GuardrailCheck[];
+  actions?: {
+    on_fail?: 'block' | 'log' | 'warn';
+    on_pass?: 'allow' | 'log';
+  };
+  status?: 'active' | 'inactive';
+}
+
+interface ListGuardrailsParams {
+  page_size?: number;
+  current_page?: number;
+  workspace_id?: string;
+}
+
+interface ListGuardrailsResponse {
+  data: Guardrail[];
+  total: number;
+  object: 'list';
+}
+
+// Usage Limit Policies
+interface UsageLimitPolicy {
+  id: string;
+  name: string;
+  slug?: string;
+  description?: string;
+  type: 'cost' | 'tokens' | 'requests';
+  limit_value: number;
+  period: 'hourly' | 'daily' | 'weekly' | 'monthly';
+  alert_threshold?: number;
+  action_on_limit?: 'block' | 'warn' | 'log';
+  applies_to?: {
+    workspace_ids?: string[];
+    api_key_ids?: string[];
+    virtual_key_ids?: string[];
+    user_ids?: string[];
+  };
+  status?: 'active' | 'inactive';
+  created_at: string;
+  last_updated_at: string;
+  object: 'usage-limit-policy';
+}
+
+interface CreateUsageLimitPolicyRequest {
+  name: string;
+  description?: string;
+  type: 'cost' | 'tokens' | 'requests';
+  limit_value: number;
+  period: 'hourly' | 'daily' | 'weekly' | 'monthly';
+  alert_threshold?: number;
+  action_on_limit?: 'block' | 'warn' | 'log';
+  applies_to?: {
+    workspace_ids?: string[];
+    api_key_ids?: string[];
+    virtual_key_ids?: string[];
+    user_ids?: string[];
+  };
+}
+
+interface UpdateUsageLimitPolicyRequest {
+  name?: string;
+  description?: string;
+  type?: 'cost' | 'tokens' | 'requests';
+  limit_value?: number;
+  period?: 'hourly' | 'daily' | 'weekly' | 'monthly';
+  alert_threshold?: number;
+  action_on_limit?: 'block' | 'warn' | 'log';
+  applies_to?: {
+    workspace_ids?: string[];
+    api_key_ids?: string[];
+    virtual_key_ids?: string[];
+    user_ids?: string[];
+  };
+  status?: 'active' | 'inactive';
+}
+
+interface ListUsageLimitPoliciesParams {
+  page_size?: number;
+  current_page?: number;
+}
+
+interface ListUsageLimitPoliciesResponse {
+  data: UsageLimitPolicy[];
+  total: number;
+  object: 'list';
+}
+
+// Rate Limit Policies
+interface RateLimitPolicy {
+  id: string;
+  name: string;
+  slug?: string;
+  description?: string;
+  type: 'requests' | 'tokens';
+  limit_value: number;
+  window: 'second' | 'minute' | 'hour';
+  action_on_limit?: 'block' | 'queue' | 'throttle';
+  applies_to?: {
+    workspace_ids?: string[];
+    api_key_ids?: string[];
+    virtual_key_ids?: string[];
+    user_ids?: string[];
+  };
+  status?: 'active' | 'inactive';
+  created_at: string;
+  last_updated_at: string;
+  object: 'rate-limit-policy';
+}
+
+interface CreateRateLimitPolicyRequest {
+  name: string;
+  description?: string;
+  type: 'requests' | 'tokens';
+  limit_value: number;
+  window: 'second' | 'minute' | 'hour';
+  action_on_limit?: 'block' | 'queue' | 'throttle';
+  applies_to?: {
+    workspace_ids?: string[];
+    api_key_ids?: string[];
+    virtual_key_ids?: string[];
+    user_ids?: string[];
+  };
+}
+
+interface UpdateRateLimitPolicyRequest {
+  name?: string;
+  description?: string;
+  type?: 'requests' | 'tokens';
+  limit_value?: number;
+  window?: 'second' | 'minute' | 'hour';
+  action_on_limit?: 'block' | 'queue' | 'throttle';
+  applies_to?: {
+    workspace_ids?: string[];
+    api_key_ids?: string[];
+    virtual_key_ids?: string[];
+    user_ids?: string[];
+  };
+  status?: 'active' | 'inactive';
+}
+
+interface ListRateLimitPoliciesParams {
+  page_size?: number;
+  current_page?: number;
+}
+
+interface ListRateLimitPoliciesResponse {
+  data: RateLimitPolicy[];
+  total: number;
+  object: 'list';
+}
+
+// Audit Logs
+interface AuditLogActor {
+  id: string;
+  type: 'user' | 'api_key' | 'system';
+  email?: string;
+  name?: string;
+}
+
+interface AuditLog {
+  id: string;
+  action: string;
+  resource_type: string;
+  resource_id?: string;
+  actor: AuditLogActor;
+  details?: Record<string, unknown>;
+  ip_address?: string;
+  user_agent?: string;
+  workspace_id?: string;
+  created_at: string;
+  object: 'audit-log';
+}
+
+interface ListAuditLogsParams {
+  page_size?: number;
+  current_page?: number;
+  action?: string;
+  resource_type?: string;
+  resource_id?: string;
+  actor_id?: string;
+  workspace_id?: string;
+  start_time?: string;
+  end_time?: string;
+}
+
+interface ListAuditLogsResponse {
+  data: AuditLog[];
+  total: number;
+  object: 'list';
+}
+
 export class PortkeyService {
   private readonly apiKey: string;
   private readonly baseUrl = 'https://api.portkey.ai/v1';
@@ -2152,5 +2417,511 @@ export class PortkeyService {
       errors,
       warnings
     };
+  }
+
+  // ============================================
+  // Phase 2: User Invite Methods
+  // ============================================
+
+  async listUserInvites(params?: ListUserInvitesParams): Promise<ListUserInvitesResponse> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.page_size) queryParams.append('page_size', params.page_size.toString());
+      if (params?.current_page) queryParams.append('current_page', params.current_page.toString());
+      if (params?.status) queryParams.append('status', params.status);
+
+      const url = `${this.baseUrl}/admin/users/invites${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as ListUserInvitesResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to list user invites: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getUserInvite(inviteId: string): Promise<UserInvite> {
+    try {
+      const response = await fetch(`${this.baseUrl}/admin/users/invites/${inviteId}`, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`User invite not found: ${inviteId}`);
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as UserInvite;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to get user invite: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async deleteUserInvite(inviteId: string): Promise<void> {
+    try {
+      const response = await fetch(`${this.baseUrl}/admin/users/invites/${inviteId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to delete user invite: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async resendUserInvite(inviteId: string): Promise<UserInvite> {
+    try {
+      const response = await fetch(`${this.baseUrl}/admin/users/invites/${inviteId}/resend`, {
+        method: 'POST',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as UserInvite;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to resend user invite: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // ============================================
+  // Phase 2: Guardrail Methods
+  // ============================================
+
+  async createGuardrail(data: CreateGuardrailRequest): Promise<Guardrail> {
+    try {
+      const response = await fetch(`${this.baseUrl}/guardrails`, {
+        method: 'POST',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as Guardrail;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to create guardrail: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async listGuardrails(params?: ListGuardrailsParams): Promise<ListGuardrailsResponse> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.page_size) queryParams.append('page_size', params.page_size.toString());
+      if (params?.current_page) queryParams.append('current_page', params.current_page.toString());
+      if (params?.workspace_id) queryParams.append('workspace_id', params.workspace_id);
+
+      const url = `${this.baseUrl}/guardrails${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as ListGuardrailsResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to list guardrails: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getGuardrail(guardrailId: string): Promise<Guardrail> {
+    try {
+      const response = await fetch(`${this.baseUrl}/guardrails/${guardrailId}`, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`Guardrail not found: ${guardrailId}`);
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as Guardrail;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to get guardrail: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async updateGuardrail(guardrailId: string, data: UpdateGuardrailRequest): Promise<Guardrail> {
+    try {
+      const response = await fetch(`${this.baseUrl}/guardrails/${guardrailId}`, {
+        method: 'PUT',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as Guardrail;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to update guardrail: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async deleteGuardrail(guardrailId: string): Promise<void> {
+    try {
+      const response = await fetch(`${this.baseUrl}/guardrails/${guardrailId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to delete guardrail: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // ============================================
+  // Phase 2: Usage Limit Policy Methods
+  // ============================================
+
+  async createUsageLimitPolicy(data: CreateUsageLimitPolicyRequest): Promise<UsageLimitPolicy> {
+    try {
+      const response = await fetch(`${this.baseUrl}/policies/usage-limits`, {
+        method: 'POST',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as UsageLimitPolicy;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to create usage limit policy: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async listUsageLimitPolicies(params?: ListUsageLimitPoliciesParams): Promise<ListUsageLimitPoliciesResponse> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.page_size) queryParams.append('page_size', params.page_size.toString());
+      if (params?.current_page) queryParams.append('current_page', params.current_page.toString());
+
+      const url = `${this.baseUrl}/policies/usage-limits${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as ListUsageLimitPoliciesResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to list usage limit policies: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getUsageLimitPolicy(policyId: string): Promise<UsageLimitPolicy> {
+    try {
+      const response = await fetch(`${this.baseUrl}/policies/usage-limits/${policyId}`, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`Usage limit policy not found: ${policyId}`);
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as UsageLimitPolicy;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to get usage limit policy: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async updateUsageLimitPolicy(policyId: string, data: UpdateUsageLimitPolicyRequest): Promise<UsageLimitPolicy> {
+    try {
+      const response = await fetch(`${this.baseUrl}/policies/usage-limits/${policyId}`, {
+        method: 'PUT',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as UsageLimitPolicy;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to update usage limit policy: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async deleteUsageLimitPolicy(policyId: string): Promise<void> {
+    try {
+      const response = await fetch(`${this.baseUrl}/policies/usage-limits/${policyId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to delete usage limit policy: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // ============================================
+  // Phase 2: Rate Limit Policy Methods
+  // ============================================
+
+  async createRateLimitPolicy(data: CreateRateLimitPolicyRequest): Promise<RateLimitPolicy> {
+    try {
+      const response = await fetch(`${this.baseUrl}/policies/rate-limits`, {
+        method: 'POST',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as RateLimitPolicy;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to create rate limit policy: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async listRateLimitPolicies(params?: ListRateLimitPoliciesParams): Promise<ListRateLimitPoliciesResponse> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.page_size) queryParams.append('page_size', params.page_size.toString());
+      if (params?.current_page) queryParams.append('current_page', params.current_page.toString());
+
+      const url = `${this.baseUrl}/policies/rate-limits${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as ListRateLimitPoliciesResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to list rate limit policies: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getRateLimitPolicy(policyId: string): Promise<RateLimitPolicy> {
+    try {
+      const response = await fetch(`${this.baseUrl}/policies/rate-limits/${policyId}`, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`Rate limit policy not found: ${policyId}`);
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as RateLimitPolicy;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to get rate limit policy: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async updateRateLimitPolicy(policyId: string, data: UpdateRateLimitPolicyRequest): Promise<RateLimitPolicy> {
+    try {
+      const response = await fetch(`${this.baseUrl}/policies/rate-limits/${policyId}`, {
+        method: 'PUT',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as RateLimitPolicy;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to update rate limit policy: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async deleteRateLimitPolicy(policyId: string): Promise<void> {
+    try {
+      const response = await fetch(`${this.baseUrl}/policies/rate-limits/${policyId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to delete rate limit policy: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // ============================================
+  // Phase 2: Audit Log Methods
+  // ============================================
+
+  async listAuditLogs(params?: ListAuditLogsParams): Promise<ListAuditLogsResponse> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.page_size) queryParams.append('page_size', params.page_size.toString());
+      if (params?.current_page) queryParams.append('current_page', params.current_page.toString());
+      if (params?.action) queryParams.append('action', params.action);
+      if (params?.resource_type) queryParams.append('resource_type', params.resource_type);
+      if (params?.resource_id) queryParams.append('resource_id', params.resource_id);
+      if (params?.actor_id) queryParams.append('actor_id', params.actor_id);
+      if (params?.workspace_id) queryParams.append('workspace_id', params.workspace_id);
+      if (params?.start_time) queryParams.append('start_time', params.start_time);
+      if (params?.end_time) queryParams.append('end_time', params.end_time);
+
+      const url = `${this.baseUrl}/audit-logs${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'x-portkey-api-key': this.apiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as ListAuditLogsResponse;
+    } catch (error) {
+      console.error('PortkeyService Error:', error);
+      throw new Error(`Failed to list audit logs: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 } 
