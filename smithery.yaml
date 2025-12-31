@@ -3,15 +3,50 @@
 startCommand:
   type: stdio
   configSchema:
-    # JSON Schema defining the configuration options for the MCP.
     type: object
     required:
       - portkeyApiKey
     properties:
       portkeyApiKey:
         type: string
-        description: The API key for the Portkey server.
+        title: Portkey API Key
+        description: >-
+          Your Portkey API key. Use an org-level Admin API key for full access
+          to all tools, or a workspace-scoped key for limited access.
+          Get your key at https://app.portkey.ai/settings/api-keys
+      transport:
+        type: string
+        title: Transport Mode
+        description: >-
+          Transport mode for the MCP server. Use 'stdio' for standard I/O
+          communication (default) or 'http' for HTTP server mode.
+        enum:
+          - stdio
+          - http
+        default: stdio
+      port:
+        type: number
+        title: HTTP Port
+        description: >-
+          Port number for HTTP server mode. Only used when transport is 'http'.
+          Defaults to 3000.
+        default: 3000
   commandFunction:
-    # A function that produces the CLI command to start the MCP on stdio.
     |-
-    config => ({ command: 'node', args: ['build/index.js'], env: { PORTKEY_API_KEY: config.portkeyApiKey } })
+    config => {
+      const isHttp = config.transport === 'http';
+      const env = {
+        PORTKEY_API_KEY: config.portkeyApiKey,
+        MCP_TRANSPORT: config.transport || 'stdio'
+      };
+
+      if (isHttp && config.port) {
+        env.MCP_PORT = String(config.port);
+      }
+
+      return {
+        command: 'node',
+        args: [isHttp ? 'build/server.js' : 'build/index.js'],
+        env
+      };
+    }
