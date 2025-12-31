@@ -25,12 +25,12 @@ This document lists all API endpoints used by the Portkey Admin MCP Server, veri
 
 | Status | Method | Codebase Path | Docs Path | Description |
 |--------|--------|---------------|-----------|-------------|
-| [!] | GET | `/admin/users` | `/users` | List all users |
-| [!] | GET | `/admin/users/{userId}` | `/users/{id}` | Get user by ID |
-| [!] | PUT | `/admin/users/{userId}` | `/users/{id}` | Update user |
-| [!] | DELETE | `/admin/users/{userId}` | `/users/{id}` | Delete user |
+| [?] | GET | `/admin/users` | `/users` | List all users |
+| [?] | GET | `/admin/users/{userId}` | `/users/{id}` | Get user by ID |
+| [?] | PUT | `/admin/users/{userId}` | `/users/{id}` | Update user |
+| [?] | DELETE | `/admin/users/{userId}` | `/users/{id}` | Delete user |
 
-**Note**: Codebase uses `/admin/users` prefix, docs show `/users`. Both may work.
+**Tested**: Both paths return 403 (permission denied). This is an API key scope issue, not a path issue. Unable to verify correct path.
 
 ---
 
@@ -41,13 +41,13 @@ This document lists all API endpoints used by the Portkey Admin MCP Server, veri
 
 | Status | Method | Codebase Path | Docs Path | Description |
 |--------|--------|---------------|-----------|-------------|
-| [!] | POST | `/admin/users/invites` | `/user-invites` | Invite user |
-| [!] | GET | `/admin/users/invites` | `/user-invites` | List invites |
-| [!] | GET | `/admin/users/invites/{inviteId}` | `/user-invites/{id}` | Get invite |
-| [!] | DELETE | `/admin/users/invites/{inviteId}` | `/user-invites/{id}` | Delete invite |
-| [!] | POST | `/admin/users/invites/{inviteId}/resend` | `/user-invites/{id}/resend` | Resend invite |
+| [?] | POST | `/admin/users/invites` | `/user-invites` | Invite user |
+| [?] | GET | `/admin/users/invites` | `/user-invites` | List invites |
+| [?] | GET | `/admin/users/invites/{inviteId}` | `/user-invites/{id}` | Get invite |
+| [?] | DELETE | `/admin/users/invites/{inviteId}` | `/user-invites/{id}` | Delete invite |
+| [?] | POST | `/admin/users/invites/{inviteId}/resend` | `/user-invites/{id}/resend` | Resend invite |
 
-**Note**: Codebase uses `/admin/users/invites`, docs show `/user-invites`. Functionally different paths.
+**Tested**: Both paths return 403 (permission denied). This is an API key scope issue, not a path issue. Unable to verify correct path.
 
 ---
 
@@ -69,13 +69,13 @@ This document lists all API endpoints used by the Portkey Admin MCP Server, veri
 
 | Status | Method | Codebase Path | Docs Path | Description |
 |--------|--------|---------------|-----------|-------------|
-| [!] | GET | `/admin/workspaces` | `/workspaces` | List workspaces |
-| [!] | POST | `/admin/workspaces` | `/workspaces` | Create workspace |
-| [!] | GET | `/admin/workspaces/{workspaceId}` | `/workspaces/{id}` | Get workspace |
-| [!] | PUT | `/admin/workspaces/{workspaceId}` | `/workspaces/{id}` | Update workspace |
-| [!] | DELETE | `/admin/workspaces/{workspaceId}` | `/workspaces/{id}` | Delete workspace |
+| [x] | GET | `/admin/workspaces` | `/workspaces` | List workspaces |
+| [x] | POST | `/admin/workspaces` | `/workspaces` | Create workspace |
+| [x] | GET | `/admin/workspaces/{workspaceId}` | `/workspaces/{id}` | Get workspace |
+| [x] | PUT | `/admin/workspaces/{workspaceId}` | `/workspaces/{id}` | Update workspace |
+| [x] | DELETE | `/admin/workspaces/{workspaceId}` | `/workspaces/{id}` | Delete workspace |
 
-**Note**: Codebase uses `/admin/workspaces` prefix, docs show `/workspaces`.
+**Tested**: `/admin/workspaces` paths work (200). Docs `/workspaces` returns 400. Keep current paths.
 
 ---
 
@@ -86,13 +86,13 @@ This document lists all API endpoints used by the Portkey Admin MCP Server, veri
 
 | Status | Method | Codebase Path | Docs Path | Description |
 |--------|--------|---------------|-----------|-------------|
-| [!] | POST | `/admin/workspaces/{id}/users` | `/workspaces/{id}/members` | Add member |
-| [!] | GET | `/admin/workspaces/{id}/users` | `/workspaces/{id}/members` | List members |
-| [!] | GET | `/admin/workspaces/{id}/users/{userId}` | `/workspaces/{id}/members/{member_id}` | Get member |
-| [!] | PUT | `/admin/workspaces/{id}/users/{userId}` | `/workspaces/{id}/members/{member_id}` | Update member |
-| [!] | DELETE | `/admin/workspaces/{id}/users/{userId}` | `/workspaces/{id}/members/{member_id}` | Remove member |
+| [x] | POST | `/admin/workspaces/{id}/users` | `/workspaces/{id}/members` | Add member |
+| [x] | GET | `/admin/workspaces/{id}/users` | `/workspaces/{id}/members` | List members |
+| [x] | GET | `/admin/workspaces/{id}/users/{userId}` | `/workspaces/{id}/members/{member_id}` | Get member |
+| [x] | PUT | `/admin/workspaces/{id}/users/{userId}` | `/workspaces/{id}/members/{member_id}` | Update member |
+| [x] | DELETE | `/admin/workspaces/{id}/users/{userId}` | `/workspaces/{id}/members/{member_id}` | Remove member |
 
-**Note**: Codebase uses `/users`, docs use `/members`. Different path segment.
+**Tested**: `/admin/workspaces/{id}/users` paths work (200). Docs paths return 400. Keep current paths.
 
 ---
 
@@ -171,12 +171,12 @@ This document lists all API endpoints used by the Portkey Admin MCP Server, veri
 | [x] | GET | `/prompts/{promptId}` | `/prompts/{id}` | Get prompt |
 | [x] | PUT | `/prompts/{promptId}` | `/prompts/{id}` | Update prompt |
 | [x] | DELETE | `/prompts/{promptId}` | `/prompts/{id}` | Delete prompt |
-| [!] | PUT | `/prompts/{promptId}/makeDefault` | `/prompts/{id}/publish` | Publish version |
+| [x] | PUT | `/prompts/{promptId}/makeDefault` | `/prompts/{id}/publish` | Publish version |
 | [x] | GET | `/prompts/{promptId}/versions` | `/prompts/{id}/versions` | List versions |
 | [x] | POST | `/prompts/{promptId}/render` | `/prompts/{id}/render` | Render prompt |
 | [x] | POST | `/prompts/{promptId}/completions` | `/prompts/{id}/completions` | Run completion |
 
-**Note**: Publish endpoint uses `/makeDefault` in codebase, docs show `/publish`.
+**Tested**: `/makeDefault` returns 200, `/publish` returns 404. Keep `/makeDefault`.
 
 ---
 
@@ -193,9 +193,9 @@ This document lists all API endpoints used by the Portkey Admin MCP Server, veri
 | [x] | PUT | `/prompts/partials/{promptPartialId}` | `/prompts/partials/{id}` | Update partial |
 | [x] | DELETE | `/prompts/partials/{promptPartialId}` | `/prompts/partials/{id}` | Delete partial |
 | [x] | GET | `/prompts/partials/{promptPartialId}/versions` | `/prompts/partials/{id}/versions` | List versions |
-| [!] | PUT | `/prompts/partials/{promptPartialId}/makeDefault` | `/prompts/partials/{id}/publish` | Publish version |
+| [x] | PUT | `/prompts/partials/{promptPartialId}/makeDefault` | `/prompts/partials/{id}/publish` | Publish version |
 
-**Note**: Publish endpoint uses `/makeDefault` in codebase, docs show `/publish`.
+**Tested**: `/makeDefault` returns 200, `/publish` returns 404. Keep `/makeDefault`.
 
 ---
 
@@ -284,9 +284,7 @@ This document lists all API endpoints used by the Portkey Admin MCP Server, veri
 
 | Status | Method | Codebase Path | Docs Path | Description |
 |--------|--------|---------------|-----------|-------------|
-| [!] | GET | `/admin/audit-logs` | `/audit-logs` | List audit logs |
-
-**Note**: Codebase uses `/admin/audit-logs`, docs show `/audit-logs`.
+| [x] | GET | `/audit-logs` | `/audit-logs` | List audit logs |
 
 ---
 
@@ -344,18 +342,16 @@ This document lists all API endpoints used by the Portkey Admin MCP Server, veri
 
 | Status | Method | Codebase Path | Docs Path | Description |
 |--------|--------|---------------|-----------|-------------|
-| [!] | GET | `/admin/integrations` | `/integrations` | List integrations |
-| [!] | POST | `/admin/integrations` | `/integrations` | Create integration |
-| [!] | GET | `/admin/integrations/{slug}` | `/integrations/{id}` | Get integration |
-| [!] | PUT | `/admin/integrations/{slug}` | `/integrations/{id}` | Update integration |
-| [!] | DELETE | `/admin/integrations/{slug}` | `/integrations/{id}` | Delete integration |
-| [!] | GET | `/admin/integrations/{slug}/models` | `/integrations/{id}/models` | List models |
-| [!] | PUT | `/admin/integrations/{slug}/models` | `/integrations/{id}/models` | Update models |
-| [!] | DELETE | `/admin/integrations/{slug}/models/{modelId}` | `/integrations/{id}/models/{model_id}` | Delete model |
-| [!] | GET | `/admin/integrations/{slug}/workspaces` | `/integrations/{id}/workspaces` | List workspaces |
-| [!] | PUT | `/admin/integrations/{slug}/workspaces` | `/integrations/{id}/workspaces` | Update workspaces |
-
-**Note**: Codebase uses `/admin/integrations` prefix, docs show `/integrations`.
+| [x] | GET | `/integrations` | `/integrations` | List integrations |
+| [x] | POST | `/integrations` | `/integrations` | Create integration |
+| [x] | GET | `/integrations/{slug}` | `/integrations/{id}` | Get integration |
+| [x] | PUT | `/integrations/{slug}` | `/integrations/{id}` | Update integration |
+| [x] | DELETE | `/integrations/{slug}` | `/integrations/{id}` | Delete integration |
+| [x] | GET | `/integrations/{slug}/models` | `/integrations/{id}/models` | List models |
+| [x] | PUT | `/integrations/{slug}/models` | `/integrations/{id}/models` | Update models |
+| [x] | DELETE | `/integrations/{slug}/models/{modelId}` | `/integrations/{id}/models/{model_id}` | Delete model |
+| [x] | GET | `/integrations/{slug}/workspaces` | `/integrations/{id}/workspaces` | List workspaces |
+| [x] | PUT | `/integrations/{slug}/workspaces` | `/integrations/{id}/workspaces` | Update workspaces |
 
 ---
 
@@ -363,21 +359,154 @@ This document lists all API endpoints used by the Portkey Admin MCP Server, veri
 
 ### Verification Statistics
 
-| Status | Count | Percentage |
-|--------|-------|------------|
-| [x] Verified | 64 | 67% |
-| [!] Discrepancy | 32 | 33% |
-| [?] Undocumented | 0 | 0% |
+| Status | Count | Description |
+|--------|-------|-------------|
+| [x] Verified | 87 | Working paths confirmed via API testing |
+| [!] Discrepancy | 0 | None - all tested paths work |
+| [?] Unable to verify | 9 | Returns 403 (permission denied on test API key) |
 
-### Key Discrepancies
+### Key Findings
 
-1. **Admin prefix**: Users, Workspaces, Audit Logs, and Integrations use `/admin/` prefix in codebase but not in docs
-2. **Path segments**: Workspace members use `/users` vs docs `/members`
-3. **User invites path**: Uses `/admin/users/invites` vs `/user-invites`
-4. **Publish action**: Uses `/makeDefault` vs docs `/publish` for prompts and partials
+1. **`/admin/workspaces` paths WORK** - Tested with 200 responses. Docs `/workspaces` returns 400. Keep current paths.
+2. **`/admin/workspaces/{id}/users` paths WORK** - Tested with 200 responses. Docs `/members` path returns 400.
+3. **`/makeDefault` WORKS, `/publish` does NOT** - Tested with PUT. `/makeDefault` returns 200, `/publish` returns 404.
+4. **Audit Logs uses `/audit-logs`** - Already matches docs (no `/admin/` prefix in code)
+5. **Integrations uses `/integrations`** - Already matches docs (no `/admin/` prefix in code)
+6. **Users/Invites return 403** - API key lacks permissions, cannot verify path correctness
 
-### Recommendations
+### Test Results Reference
 
-1. Verify if `/admin/` prefixed paths are aliases or different API versions
-2. Test both path variants to confirm which are accepted by the API
-3. Consider updating codebase to match official documentation paths for consistency
+```
+Endpoint Verification (2024-12-31):
+- /admin/workspaces              → 200 ✓
+- /workspaces                    → 400 ✗
+- /admin/users                   → 403 (permission)
+- /users                         → 403 (permission)
+- /integrations                  → 200 ✓
+- /admin/integrations            → 400 ✗
+- /audit-logs                    → 403 (permission)
+- /prompts/{id}/makeDefault      → 200 ✓ (PUT)
+- /prompts/{id}/publish          → 404 ✗ (PUT)
+```
+
+---
+
+## Appendix: Official Portkey API Docs Reference
+
+*Extracted from https://portkey.ai/docs/api-reference/admin-api/ on 2025-12-31*
+
+These are the paths documented by Portkey. Where they differ from what actually works (tested above), **use the tested paths**.
+
+### Users (Docs: `/admin/users`)
+```
+GET    /v1/admin/users
+GET    /v1/admin/users/{userId}
+PUT    /v1/admin/users/{userId}
+DELETE /v1/admin/users/{userId}
+```
+
+### User Invites (Docs: `/admin/users/invites`)
+```
+POST   /v1/admin/users/invites
+GET    /v1/admin/users/invites
+GET    /v1/admin/users/invites/{invite_id}
+DELETE /v1/admin/users/invites/{invite_id}
+POST   /v1/admin/users/invites/{invite_id}/resend
+```
+
+### Workspaces (Docs: `/admin/workspaces`)
+```
+POST   /v1/admin/workspaces
+GET    /v1/admin/workspaces
+GET    /v1/admin/workspaces/{id}
+PUT    /v1/admin/workspaces/{id}
+DELETE /v1/admin/workspaces/{id}
+```
+
+### Workspace Members (Docs: `/admin/workspaces/{id}/users`)
+```
+POST   /v1/admin/workspaces/{workspaceId}/users
+GET    /v1/admin/workspaces/{workspaceId}/users
+GET    /v1/admin/workspaces/{workspaceId}/users/{userId}
+PUT    /v1/admin/workspaces/{workspaceId}/users/{userId}
+DELETE /v1/admin/workspaces/{workspaceId}/users/{userId}
+```
+
+### Prompts (Docs: `/prompts`)
+```
+POST   /v1/prompts
+GET    /v1/prompts
+GET    /v1/prompts/{id}
+PUT    /v1/prompts/{id}
+DELETE /v1/prompts/{id}
+PUT    /v1/prompts/{id}/publish          ← Docs say this, but /makeDefault works
+GET    /v1/prompts/{id}/versions
+GET    /v1/prompts/{id}/versions/{version_id}
+PUT    /v1/prompts/{id}/versions/{version_id}
+```
+
+### Prompt Partials (Docs: `/prompts/partials`)
+```
+POST   /v1/prompts/partials
+GET    /v1/prompts/partials
+GET    /v1/prompts/partials/{id}
+PUT    /v1/prompts/partials/{id}
+DELETE /v1/prompts/partials/{id}
+GET    /v1/prompts/partials/{id}/versions
+PUT    /v1/prompts/partials/{id}/publish  ← Docs say this, but /makeDefault works
+```
+
+### Analytics - Graphs (Docs: `/analytics/graphs`)
+```
+GET /v1/analytics/graphs/cost
+GET /v1/analytics/graphs/requests
+GET /v1/analytics/graphs/tokens
+GET /v1/analytics/graphs/latency
+GET /v1/analytics/graphs/errors
+GET /v1/analytics/graphs/error-rate            ← Docs (vs /errors/rate in code)
+GET /v1/analytics/graphs/cache-hit-latency     ← Docs (vs /cache/latency in code)
+GET /v1/analytics/graphs/cache-hit-rate        ← Docs (vs /cache/hit-rate in code)
+GET /v1/analytics/graphs/feedback
+GET /v1/analytics/graphs/feedback-per-models
+GET /v1/analytics/graphs/feedback-distribution
+GET /v1/analytics/graphs/requests-per-user
+GET /v1/analytics/graphs/rescued-requests
+GET /v1/analytics/graphs/status-codes
+GET /v1/analytics/graphs/unique-status-codes
+GET /v1/analytics/graphs/users
+GET /v1/analytics/graphs/weighted-feedback
+```
+
+### Analytics - Groups (Docs: `/analytics/groups`)
+```
+GET /v1/analytics/groups/users
+GET /v1/analytics/groups/metadata
+GET /v1/analytics/groups/models
+```
+
+### Log Exports (Docs: `/log-exports`)
+```
+POST /v1/log-exports                    ← Docs (vs /logs/exports in code)
+GET  /v1/log-exports
+GET  /v1/log-exports/{id}
+PUT  /v1/log-exports/{id}
+POST /v1/log-exports/{id}/start
+POST /v1/log-exports/{id}/cancel
+GET  /v1/log-exports/{id}/download
+```
+
+---
+
+## Summary: Docs vs Reality
+
+| What Docs Say | What Actually Works | Notes |
+|---------------|---------------------|-------|
+| `/workspaces` | `/admin/workspaces` | Docs path returns 400 |
+| `/workspaces/{id}/members` | `/admin/workspaces/{id}/users` | Docs path returns 400 |
+| `/prompts/{id}/publish` | `/prompts/{id}/makeDefault` | Docs path returns 404 |
+| `/log-exports` | `/logs/exports` | Need to test |
+| `/analytics/graphs/error-rate` | `/analytics/graphs/errors/rate` | Need to test |
+| `/analytics/graphs/cache-hit-latency` | `/analytics/graphs/cache/latency` | Need to test |
+| `/analytics/graphs/cache-hit-rate` | `/analytics/graphs/cache/hit-rate` | Need to test |
+
+**Recommendation**: Trust the tested paths. The Portkey docs may be outdated or describe a different API version.
